@@ -5,6 +5,7 @@ const session = vi.hoisted(() => ({
   captureCookies: vi.fn(),
 }));
 const fetchMock = vi.hoisted(() => vi.fn());
+vi.mock('@tanstack/react-start/server',()=>({setResponseHeader:vi.fn()}));
 
 vi.mock("@/lib/account-session.server", () => ({
   getFortebetSessionCookieHeader: session.getCookieHeader,
@@ -74,7 +75,11 @@ it("loads only the signed-in account's own profile and activity records", async 
     expect(url).toMatch(/^https:\/\/fortebet\.ug\/api\/web\/v1\/client\//);
     expect(options.method).toBe("POST");
     expect((options.headers as Headers).get("Cookie")).toBe("forte_session=test-session");
-    expect(JSON.parse(options.body as string)).toEqual({});
+    const body = JSON.parse(options.body as string);
+    if(url.endsWith('/transactions/get')) expect(body).toEqual({limit:31,offset:0,dateFrom:null,dateTo:null,wallet:1,type:'all'});
+    else if(url.endsWith('/tickets/get')) expect(body).toEqual({limit:31,offset:0,dateFrom:null,dateTo:null,state:[],betType:['ALL']});
+    else if(url.endsWith('/messages/get')) expect(body).toEqual({limit:31,offset:0,lang:'EN'});
+    else expect(body).toEqual({});
   }
 });
 

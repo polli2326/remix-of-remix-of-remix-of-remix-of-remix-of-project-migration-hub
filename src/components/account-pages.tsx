@@ -1,10 +1,13 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useServerFn } from '@tanstack/react-start';
+import { AccountRecords } from './account-records';
+import { validateProfileChanges } from '@/lib/account-inputs';
 import { ArrowDownToLine, ArrowUpFromLine, ArrowLeft, ArrowRight, Banknote, Eye, EyeOff, Mail, Smartphone, Store, Ticket, UserRound, Wallet } from 'lucide-react';
 import { LiveShell } from './live-shell';
 import { Button } from './ui/button';
 import { openLogin } from '@/lib/login-modal';
 import { setAccountSession, useAccountSession } from '@/lib/account-state';
-import { getSignedInAccountActivity, getPendingMobileMoney, requestMobileMoneyDeposit, requestMobileMoneyPayout, type SignedInAccountActivityResult } from '@/lib/account.functions';
+import { getSignedInAccountActivity, getPendingMobileMoney, requestMobileMoneyDeposit, requestMobileMoneyPayout, requestBranchWithdrawal, saveAccountProfile, type SignedInAccountActivityResult } from '@/lib/account.functions';
 import { accountLinks, accountPageTitle, accountText as text, recordObject as obj, recordRows } from '@/lib/account-pages';
 
 type Activity = Extract<SignedInAccountActivityResult, {ok:true}>;
@@ -26,7 +29,8 @@ export function AccountPages({ path = 'profile' }: { path?: string }) {
   }, [session.account?.nickname, refresh]);
   const profile = obj(data?.profile['ok'] ? data.profile['data'] : null);
   const contact = obj(profile['contact']);
-  const address = obj(contact['address'] ?? profile['address']);
+  const addresses = contact['address'] ?? profile['address'];
+  const address = obj(Array.isArray(addresses) ? addresses.find(a=>obj(a)['addressType']==='MAIN') ?? addresses[0] : addresses);
   return <LiveShell layout="full" active="account"><div className="fb-account">
     <nav className="fb-account-nav" aria-label="Account navigation">{accountLinks.map(([label,target,kind]) => {
       const Icon = kind === 'wallet' ? Wallet : kind === 'ticket' ? Ticket : kind === 'profile' ? UserRound : kind === 'messages' ? Mail : Banknote;
@@ -36,7 +40,7 @@ export function AccountPages({ path = 'profile' }: { path?: string }) {
     <main className={`fb-account-main ${path === 'profile' ? 'fb-profile-main' : ''}`}>
       {!session.account ? <div className="fb-account-signin"><Button className="fb-account-action" onClick={openLogin}>Login</Button></div> : <>
         {error && <p role="alert">{error}</p>}
-        {path === 'deposit' ? <CashierHome/> : path === 'profile' ? <ProfilePage key={data ? session.account.nickname : "loading"} nickname={session.account.nickname} contact={contact} address={address} loading={loading}/> : /^(deposits|withdrawals)\//.test(path) ? <PaymentPage key={path} path={path} phone={text(contact['phone'])} balance={session.account.balance}/> : <RecordsPage key={path} path={path} data={data} loading={loading} reload={()=>setRefresh(n=>n+1)}/>}
+        {path === 'deposit' ? <CashierHome/> : path === 'profile' ? <ProfilePage key={data ? `${session.account.nickname}-${refresh}` : "loading"} nickname={session.account.nickname} contact={contact} address={address} loading={loading} ready={Boolean(data?.profile.ok)} reload={()=>setRefresh(n=>n+1)}/> : /^(deposits|withdrawals)\//.test(path) ? <PaymentPage key={path} path={path} phone={text(contact['phone'])} balance={session.account.balance}/> : <AccountRecords key={path} path={path}/>}
       </>}
     </main>
   </div></LiveShell>;
@@ -51,23 +55,42 @@ function CashierHome() {
 }
 function ProfileField({label,value,placeholder,password=false}: {label:string;value?:string;placeholder?:string;password?:boolean}) {
   const [show,setShow] = useState(false);
-  return <label className="fb-profile-field"><span>{label}</span><div className="fb-profile-input"><input aria-label={label} defaultValue={value} placeholder={placeholder} type={password && !show ? 'password' : 'text'} autoComplete={password ? 'new-password' : 'off'}/>{password && <Button variant="ghost" size="icon" type="button" aria-label={`${show ? 'Hide' : 'Show'} ${label}`} onClick={()=>setShow(!show)}>{show ? <EyeOff/> : <Eye/>}</Button>}</div></label>;
+  return <label className="fb-profile-field"><span>{label}</span><div className="fb-profile-input"><input name={label} aria-label={label} defaultValue={value} placeholder={placeholder} type={password && !show ? 'password' : 'text'} autoComplete={password ? 'new-password' : 'off'}/>{password && <Button variant="ghost" size="icon" type="button" aria-label={`${show ? 'Hide' : 'Show'} ${label}`} onClick={()=>setShow(!show)}>{show ? <EyeOff/> : <Eye/>}</Button>}</div></label>;
 }
-function ProfilePage({nickname,contact,address,loading}: {nickname:string;contact:Record<string,unknown>;address:Record<string,unknown>;loading:boolean}) {
+function ProfilePage({nickname,contact,address,loading,ready,reload}: {nickname:string;contact:Record<string,unknown>;address:Record<string,unknown>;loading:boolean;ready:boolean;reload:()=>void}) {
   const [notice,setNotice] = useState('');
   const email = text(contact['email']).split('@');
-  return <form onSubmit={e=>{e.preventDefault();setNotice('Profile changes are not connected here. Please save changes on fortebet.ug.');}}>
+  const save = useServerFn(saveAccountProfile);
+  const [saving,setSaving] = useState(false);
+  const submitting = useRef(false);
+  async function submit(e:FormEvent<HTMLFormElement>) {
+    e.preventDefault(); if(submitting.current || !ready) return;
+    const form = e.currentTarget; const values = new FormData(form);
+    const value = (key:string) => String(values.get(key) ?? '');
+    try {
+      const data = validateProfileChanges({title:value('Title'),firstName:value('First name'),lastName:value('Last name'),email:value('emailName') || value('emailDomain') ? value('emailName')+'@'+value('emailDomain') : '',streetName:value('Address'),city:value('City'),zipcode:value('Zipcode'),currentPassword:value('Current password'),newPassword:value('New password'),newPasswordAgain:value('New password again')});
+      submitting.current=true;setSaving(true);setNotice('');
+      const result = await save({data}); setNotice(result.message);
+      if(result.ok) {form.querySelectorAll<HTMLInputElement>('input[name*=password],input[name*=Password]').forEach(input=>{input.value='';}); reload();}
+    } catch(error) {setNotice(error instanceof Error ? error.message : 'Unable to save changes. Please try again.');}
+    finally {submitting.current=false;setSaving(false);}
+  }
+  return <form onSubmit={submit}>
+    <fieldset disabled={saving || loading || !ready} className="fb-profile-fields">
     <section className="fb-profile-section"><h2>Profile</h2><div className="fb-profile-details"><p><span>Username</span><strong>{nickname}</strong></p><p><span>Phone number</span><strong>{loading ? '…' : text(contact['phone'])}</strong></p></div></section>
-    <section className="fb-profile-section"><h2>Name and address</h2><div className="fb-profile-columns"><div><ProfileField label="Title" value={text(contact['title'])} placeholder="Enter your title"/><ProfileField label="First name" value={text(contact['firstName'])}/><ProfileField label="Last name" value={text(contact['lastName'])}/><label className="fb-profile-field"><span>E-mail</span><div className="fb-email"><input aria-label="Email name" defaultValue={email[0]}/><span>@</span><input aria-label="Email domain" defaultValue={email[1]}/></div></label></div><div><ProfileField label="Address" value={text(address['address'] || address['streetName'])}/><ProfileField label="City" value={text(address['city'])}/><ProfileField label="Zipcode" value={text(address['zipcode'])}/></div></div></section>
+    <section className="fb-profile-section"><h2>Name and address</h2><div className="fb-profile-columns"><div><ProfileField label="Title" value={text(contact['title'])} placeholder="Enter your title"/><ProfileField label="First name" value={text(contact['firstName'])}/><ProfileField label="Last name" value={text(contact['lastName'])}/><label className="fb-profile-field"><span>E-mail</span><div className="fb-email"><input name="emailName" aria-label="Email name" defaultValue={email[0]}/><span>@</span><input name="emailDomain" aria-label="Email domain" defaultValue={email[1]}/></div></label></div><div><ProfileField label="Address" value={text(address['address'] || address['streetName'])}/><ProfileField label="City" value={text(address['city'])}/><ProfileField label="Zipcode" value={text(address['zipcode'])}/></div></div></section>
     <section className="fb-profile-section"><h2>Change password</h2><div className="fb-profile-columns"><div><ProfileField label="New password" password placeholder="Enter new password"/><ProfileField label="New password again" password placeholder="Enter new password again"/></div></div></section>
-    <section className="fb-profile-confirm"><ProfileField label="Current password" password placeholder="Enter current password"/><Button className="fb-account-action" type="submit">Save changes</Button>{notice && <p role="status">{notice}</p>}</section>
+    <section className="fb-profile-confirm"><ProfileField label="Current password" password placeholder="Enter current password"/><Button className="fb-account-action" type="submit">{saving ? 'SAVING…' : 'Save changes'}</Button>{notice && <p role="status">{notice}</p>}</section>
+    </fieldset>
   </form>;
 }
 function PaymentPage({path,phone,balance}: {path:string;phone:string;balance:number}) {
   const withdraw = path.startsWith('withdrawals'); const provider = path.split('/')[1] ?? 'mtn'; const branch = provider === 'branch'; const name = provider === 'mtn' ? 'MTN' : 'Airtel';
   const [amount,setAmount] = useState(''); const [pending,setPending] = useState(true);const [blocked,setBlocked] = useState(false);const [notice,setNotice] = useState('');
   useEffect(()=>{if(branch){setPending(false);return;}let active=true;void getPendingMobileMoney({data:{kind:withdraw?'payout':'payin'}}).then(r=>{if(!active)return;setBlocked(!r.ok || r.requests.length>0);if(!r.ok)setNotice(r.message);else if(r.requests.length)setNotice('A mobile money request is pending.');}).catch(()=>{if(active){setBlocked(true);setNotice('Unable to check pending requests.');}}).finally(()=>{if(active)setPending(false);});return()=>{active=false;};},[withdraw,branch]);
-  async function submit(e:FormEvent) { e.preventDefault();if(branch){setNotice('Branch withdrawal requests are not connected here. Use fortebet.ug.');return;}setPending(true);setNotice('');try {const result=await (withdraw?requestMobileMoneyPayout:requestMobileMoneyDeposit)({data:{amount:Number(amount)}});setNotice(result.message);if(result.ok){setBlocked(true);setAmount('');}}catch{setNotice('Unable to complete the request. Please try again.');}finally{setPending(false);} }
+  const deposit = useServerFn(requestMobileMoneyDeposit); const payout = useServerFn(requestMobileMoneyPayout); const branchPayout = useServerFn(requestBranchWithdrawal);
+  const submitting = useRef(false);
+  async function submit(e:FormEvent) {e.preventDefault();if(submitting.current || pending || blocked)return;submitting.current=true;setPending(true);setNotice('');try {const result=await (branch?branchPayout:withdraw?payout:deposit)({data:{amount:Number(amount)}});setNotice([result.message,result.ok ? result.instructions : ''].filter(Boolean).join(' '));if(result.ok){setBlocked(true);setAmount('');}}catch(error){setNotice(error instanceof Error ? error.message : 'Unable to complete the request. Please try again.');}finally{submitting.current=false;setPending(false);} }
   return <><h2 className="fb-account-heading"><Button variant="ghost" asChild className="fb-back"><a href={base+'deposit'}><ArrowLeft/> BACK</a></Button><Wallet/>{branch ? withdraw?'CASH WITHDRAWAL AT THE BRANCH':'DEPOSITING MONEY AT THE BRANCH' : withdraw?'WITHDRAWAL VIA MOBILE '+name.toUpperCase():'DEPOSITING MONEY VIA '+name.toUpperCase()}</h2>
     <article className="fb-payment-article"><header><h1>{withdraw?'WITHDRAWAL MONEY FROM YOUR ACCOUNT':'DEPOSIT MONEY TO YOUR ACCOUNT'}<br/><em>{branch?'AT THE BRANCH':'DIRECTLY FROM YOUR MOBILE PHONE'}</em></h1>{!branch && <Provider name={provider}/>}</header>
       {branch ? <div className="fb-payment-copy">{withdraw ? <><p>Enter the amount you want to withdraw. Then you will receive a 4digit number on your registered phone number.</p><p>To complete the withdrawal visit a Fortebet branch and give the operator your username along with the 4digit number.</p></> : <><p><em>Client In</em> is a convenient option for depositing funds instantly, directly into your account.</p><ul><li>Visit any branch and inform the operator that you wish to perform a Client In transaction.</li><li>Provide your username and the desired amount. You will be issued with a transaction slip.</li><li>Carefully review the information on the slip to ensure all details are correct.</li><li>In the event of an error, the transaction can be cancelled within 10 minutes.</li></ul></>}</div> : !withdraw && <><h3>YOU CAN CHOOSE ONE OF TWO OPTIONS</h3><p className="fb-payment-option"><b>1.</b> FIRST OPTION - load from your ForteBet registered number:</p></>}
@@ -77,21 +100,5 @@ function PaymentPage({path,phone,balance}: {path:string;phone:string;balance:num
       {withdraw && !branch && <><p>Another withdrawal request can be made after 2 minutes from the last approved request, if the maximum limit has not been reached. All fees are charged by your telecom provider.</p><h3>FEES:</h3><p>Your telecom provider applies mobile money withdrawal fees according to the amount withdrawn.</p></>}
       </div></article>
       {!withdraw && !branch && <article className="fb-payment-article"><p className="fb-payment-option"><b>2.</b> SECOND OPTION - load from a different number:</p><div className="fb-payment-copy"><p>Make sure the different number is not registered with ForteBet. After completing the payment call 0800 202 202 or 0800 303 303 so the team can credit your account.</p><h3>{provider==='mtn'?'9':'6'} QUICK STEPS - how to load money into my account</h3><ol className="fb-payment-steps">{(provider==='mtn'?['Dial *165#','Select Payments','Select Lotto & Sports Betting','Enter merchant code FORTEBET','Enter your username as payment reference','Enter the amount','Confirm using your mobile money PIN','Wait for processing','Check your confirmation message']:['Dial *185#','Select Payments','Select Betting and Gaming','Select FORTEBET','Enter the amount','Enter your username as the reference']).map((s,i)=><li key={s}><strong>STEP {i+1}</strong><p>{s}</p></li>)}</ol></div></article>}
-  </>;
-}
-function RecordsPage({path,data,loading,reload}: {path:string;data:Activity|null;loading:boolean;reload:()=>void}) {
-  const tickets=path.startsWith('bets');const messages=path==='messages';const points=path.endsWith('/pts');
-  const [filters,setFilters]=useState(['All']);const [from,setFrom]=useState('');const [to,setTo]=useState('');const [expanded,setExpanded]=useState<number|null>(null);
-  const record=messages?data?.messages:tickets?data?.tickets:data?.transactions;
-  const options=tickets?['All','Win','Cashout','Placed','Lost','Void','Canceled']:['All','Deposits','Withdrawals','Money winnings','Money losses'];
-  const rows=recordRows(record).filter(row=>{
-    const timestamp=text(row['timestampIn']??row['timestamp']??row['date']);if(from&&timestamp.slice(0,10)<from||to&&timestamp.slice(0,10)>to)return false;
-    if(tickets && !['bets','bets/all','bets/betting'].includes(path)){const type=text(row['type']).toLowerCase();if(path==='bets/vsoccer'&&!type.includes('soccer'))return false;if(path==='bets/live'&&!type.includes('live'))return false;if(path==='bets/prematch'&&!type.includes('prematch'))return false;if(path==='bets/virtual'&&!type.includes('virtual'))return false;}
-    if(filters.includes('All')||messages)return true;const status=text(row['status']).toLowerCase();const amount=Number(row['amount']??row['value']??0);return filters.some(f=>tickets?status===f.toLowerCase():f==='Deposits'?amount>0:f==='Withdrawals'?amount<0:text(row['type']).toLowerCase().includes(f.toLowerCase()));
-  });
-  return <><h2 className="fb-account-heading">{messages ? "MY MESSAGES" : accountPageTitle(path).toUpperCase()}</h2>{!messages && <div className="fb-record-filters">{options.map(option=><label key={option}><input type="checkbox" checked={filters.includes(option)} onChange={()=>setFilters(current=>option==='All'?['All']:current.includes(option)?current.filter(f=>f!==option):[...current.filter(f=>f!=='All'),option])}/>{option}</label>)}<input aria-label="From" placeholder="From" type={from?'date':'text'} value={from} onFocus={e=>e.currentTarget.type='date'} onChange={e=>setFrom(e.target.value)}/><input aria-label="To" placeholder="To" type={to?'date':'text'} value={to} onFocus={e=>e.currentTarget.type='date'} onChange={e=>setTo(e.target.value)}/><Button className="fb-account-action" onClick={reload} disabled={loading}>REFRESH</Button></div>}
-    {record && !record.ok && <p className="fb-record-error" role="status">{record.message}</p>}
-    {loading && !data && <p role="status">Loading…</p>}
-    {messages ? <div className="fb-messages"><div className="fb-message-header"><span>Date</span><span>Subject</span></div>{rows.map((row,i)=><section key={i}><Button variant="ghost" className="fb-message-title" onClick={()=>setExpanded(expanded===i?null:i)}><span>{date(row['timestamp'])}</span><strong>{text(row['title'])}</strong></Button>{expanded===i && <p>{text(row['html']).replace(/<[^>]*>/g,' ').replace(/&nbsp;/g,' ')}</p>}</section>)}</div> : tickets ? <div className="fb-ticket-list">{rows.map((row,i)=><section key={i}><Button variant="ghost" className="fb-ticket-row" onClick={()=>setExpanded(expanded===i?null:i)}><span><Ticket/>{text(row['shortNumber']??row['number'])}</span><span>{date(row['timestampIn'])} | {text(row['type'])}<br/>{text(row['type']).toLowerCase().includes('soccer')?'Virtual Soccer':text(row['type'])}</span><span>Stake<strong>{money(row['amountIn'])}</strong></span><span>Real Win<strong>{money(row['amountOut'])}</strong></span><span>Total Odds<strong>{text(row['totalOdds'])}</strong></span><span>{text(row['status'])}</span></Button>{expanded===i && <div className="fb-ticket-detail">{text(row['number'])} · {text(row['itemsCount'])} selections · {text(row['status'])}</div>}</section>)}</div> : <div className="fb-table-scroll"><table className="fb-transactions"><thead><tr>{['Date','Type','Value','Balance','Detail','Description'].map(s=><th key={s}>{s}</th>)}</tr></thead><tbody>{rows.map((row,i)=><tr key={i}><td>{date(row['timestamp']??row['date'])}</td><td>{text(row['type'])}</td><td>{points?text(row['amount']??row['value']):money(row['amount']??row['value'])}</td><td>{points?text(row['balance']):money(row['balance'])}</td><td>{text(row['detail'])}</td><td>{text(row['description'])}</td></tr>)}</tbody></table></div>}
   </>;
 }

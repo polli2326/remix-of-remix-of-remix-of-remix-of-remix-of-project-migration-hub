@@ -36,10 +36,10 @@ export function recordRequest(input: AccountRecordQuery) {
   if (input.path === 'messages') return {limit:31,offset:input.page*30,lang:'EN'};
   if (input.path.startsWith('transactions')) {
     const types: Record<string,string> = {'Deposits':'deposits','Withdrawals':'withdrawals','Money winnings':'moneyWin','Money losses':'moneyLost','VIP PTS winnings':'vipWin','VIP PTS losses':'vipLost','Transfers':'vipTransfer'};
-    const type = input.filters.includes('All') ? '' : input.filters.map(f=>types[f]).filter(Boolean).join(',');
-    return {...shared,wallet:input.path.endsWith('pts')?2:1,...(type?{type}:{})};
+    const type = input.filters.includes('All') ? 'all' : input.filters.map(f=>types[f]).filter(Boolean).join(',');
+    return {...shared,wallet:input.path.endsWith('pts')?2:1,type:type || 'all'};
   }
   const state = input.filters.includes('All') ? [] : input.filters.flatMap(f=>f === 'Placed' ? ['PLACED','REPAIRED'] : [f.toUpperCase()]);
-  const betTypes:Record<string,string> = {'all':'all','betting':'betting','prematch':'prematch','live':'live','virtual':'virtual','vsoccer':'vsoccer'};
+  const betTypes:Record<string,string> = {'all':'ALL','betting':'BETTING','prematch':'PREMATCH','live':'LIVE','virtual':'VIRTUAL','vsoccer':'VSOCCER'};
   return {...shared,state,betType:[betTypes[input.path.split('/')[1] ?? 'all'] ?? 'all']};
 }
