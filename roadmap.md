@@ -1,4 +1,5 @@
 # Account page matching
+- [ ] Connect real account actions: profile saving, password changes, branch withdrawals, record filters, ticket details, and messages.
 - [x] Inspect Fortebet’s signed-in profile, deposit, withdrawal, transactions, tickets and messages.
 - [x] Replace mismatched account views and connect the profile menu to matching pages.
 - [x] Verify signed-in navigation and layouts without submitting payments or changing account details.
