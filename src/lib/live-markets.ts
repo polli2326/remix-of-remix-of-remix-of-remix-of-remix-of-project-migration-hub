@@ -27,8 +27,8 @@ export function ordinal(n: string) {
   const v = parseInt(n, 10);
   if (!Number.isFinite(v)) return n;
   const r = v % 100;
-  const suf = r >= 11 && r <= 13 ? "th" : ["th", "st", "nd", "rd"][v % 10] ?? "th";
-  return `${v}${v % 10 > 3 ? "th" : suf}`;
+  if (r >= 11 && r <= 13) return `${v}th`;
+  return `${v}${["th", "st", "nd", "rd"][v % 10] ?? "th"}`;
 }
 
 export function parseSpecifiers(spec: string | null | undefined): Record<string, string> {
