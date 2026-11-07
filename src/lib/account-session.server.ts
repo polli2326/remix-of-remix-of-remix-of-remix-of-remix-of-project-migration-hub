@@ -49,11 +49,15 @@ function decodeSessionCookies(): Map<string, string> {
 }
 
 function writeSessionCookies(cookies: Map<string, string>) {
+  // The editor preview runs the app inside a cross-site frame, where browsers
+  // drop SameSite=Lax cookies. A Secure, partitioned SameSite=None cookie is
+  // kept there and still works top-level (browsers treat localhost as secure).
   const options = {
     path: "/",
     httpOnly: true,
-    secure: getRequestProtocol() === "https",
-    sameSite: "lax" as const,
+    secure: true,
+    sameSite: "none" as const,
+    partitioned: true,
   };
   if (cookies.size === 0) {
     setCookie(SESSION_COOKIE, "", { ...options, maxAge: 0 });
