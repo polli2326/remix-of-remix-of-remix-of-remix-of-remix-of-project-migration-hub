@@ -1,15 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { Maximize, X } from "lucide-react";
 import { AccountHeader } from "@/components/account-header";
 import { Button } from "@/components/ui/button";
 import { openRegister } from "@/lib/login-modal";
-import { getVirtualOffer } from "@/lib/virtual-soccer.functions";
+import { VirtualNavItem, virtualOfferQuery } from "@/components/virtual-nav";
 import { kickoffCountdown, virtualOddLabel, virtualClock, toggleVirtualPick, type VirtualMatch, type VirtualOdd, type VirtualPick } from "@/lib/virtual-soccer";
 import capturedCSS from "../styles/pages/virtual-soccer.css?raw";
 
-const virtualQuery = queryOptions({ queryKey: ["virtual-soccer-offer"], queryFn: () => getVirtualOffer(), refetchInterval: 5000 });
+const virtualQuery = virtualOfferQuery;
 
 export const Route = createFileRoute("/virtual-soccer")({
   head: () => ({ meta: [
@@ -376,16 +376,7 @@ function Index() {
                   </li>
                   <li {...({ "_ngcontent-bdf-c206": "" } as any)}>
                     <a className="withIco active" href="#" {...({ "_ngcontent-bdf-c206": "", routerlinkactive: "active" } as any)}>
-                      <div data-ce="app-virtual-soccer-sec-header" {...({ "_ngcontent-bdf-c206": "" } as any)}>
-                        <div>
-                          <icon {...({ href: "https://fortebet.ug/#icoSportVirtualsoccer", classname: "current h30", "_nghost-bdf-c39": "" } as any)}>
-                            <svg className="current h30 align-middle" viewBox="0 0 100 100" {...({ "_ngcontent-bdf-c39": "" } as any)}>
-                              <use xlinkHref="#icoSportVirtualsoccer" {...({ "_ngcontent-bdf-c39": "" } as any)} />
-                            </svg>
-                          </icon>
-                        </div>
-                        <div> {offer.matches[0] ? `${offer.matches[0].home.replace("V-", "")}-${offer.matches[0].away.replace("V-", "")}` : "Virtual Soccer"} <br /><span>{countdown}</span></div>
-                      </div>
+                      <VirtualNavItem iconHref="https://fortebet.ug/#icoSportVirtualsoccer" />
                     </a>
                   </li>
                   <li {...({ "_ngcontent-bdf-c206": "" } as any)}>
