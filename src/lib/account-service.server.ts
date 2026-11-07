@@ -16,6 +16,8 @@ import type {
   SignedInAccountActivityResult,
 } from "@/lib/account.functions";
 import { clearFortebetSessionCookie } from "@/lib/account-session.server";
+import { setResponseHeader } from '@tanstack/react-start/server';
+import { recordRequest, type AccountRecordQuery, type ProfileChanges } from './account-inputs';
 
 const API_BASE = "https://fortebet.ug/api/web/v1";
 const PAYIN_PATH = "/mobilemoney/request-payin";
@@ -68,6 +70,7 @@ async function requestFortebet(
   timeoutMs?: number,
 ): Promise<{ response: Response; payload: ApiPayload | null }> {
   const headers = new Headers({ Accept: "application/json" });
+  setResponseHeader('Cache-Control', 'no-store');
   const cookie = getFortebetSessionCookieHeader();
   if (cookie) headers.set("Cookie", cookie);
   if (body !== undefined) headers.set("Content-Type", "application/json");
@@ -186,9 +189,9 @@ function safeClientRecordValue(value: unknown, depth = 0): FortebetRecordValue {
   return null;
 }
 
-async function loadClientRecord(path: string): Promise<FortebetClientRecord> {
+async function loadClientRecord(path: string, body: unknown = {}): Promise<FortebetClientRecord> {
   try {
-    const { response, payload } = await requestFortebet(path, "POST", {}, 12_000);
+    const { response, payload } = await requestFortebet(path, "POST", body, 12_000);
     if (!response.ok || payload?.status !== "OK") {
       return {
         ok: false,
@@ -210,9 +213,9 @@ export async function loadSignedInAccountActivity(): Promise<SignedInAccountActi
   const [profile, preferences, transactions, tickets, messages, session] = await Promise.all([
     loadClientRecord("/client/profile/get"),
     loadClientRecord("/client/preferences/get"),
-    loadClientRecord("/client/transactions/get"),
-    loadClientRecord("/client/tickets/get"),
-    loadClientRecord("/client/messages/get"),
+    loadClientRecord("/client/transactions/get", recordRequest({path:'transactions/money',filters:['All'],from:'',to:'',page:0})),
+    loadClientRecord("/client/tickets/get", recordRequest({path:'bets/all',filters:['All'],from:'',to:'',page:0})),
+    loadClientRecord("/client/messages/get", {limit:31,offset:0,lang:'EN'}),
     loadClientRecord("/client/alive"),
   ]);
 
@@ -341,6 +344,48 @@ export async function submitMobileMoneyPayout(amount: number): Promise<MobileMon
     { amount, id_provider: -1 },
     "The withdrawal request could not be completed.",
   );
+}
+
+export async function submitBranchWithdrawal(amount: number): Promise<MobileMoneyActionResult> {
+  const account = await loadFortebetAccount(12_000);
+  if (!account.ok) return {ok:false,message:'Sign in again before requesting a withdrawal.'};
+  if (!Number.isSafeInteger(amount) || amount <= 0 || amount > account.account.balance) {
+    return {ok:false,message:'The withdrawal amount must be a whole number within your available balance.'};
+  }
+  return submitMobileMoneyRequest('/client/paymethods/payout-request', {amount}, 'The branch withdrawal request could not be completed.');
+}
+
+export async function loadAccountRecords(query: AccountRecordQuery):Promise<FortebetClientRecord> {
+  if (!(await loadFortebetAccount(12_000)).ok) return {ok:false,message:'Sign in to view your account records.'};
+  const path = query.path === 'messages' ? '/client/messages/get' : query.path.startsWith('bets/') ? '/client/tickets/get' : '/client/transactions/get';
+  return loadClientRecord(path, recordRequest(query));
+}
+export async function loadAccountMessage(messageId:number):Promise<FortebetClientRecord> {
+  if (!(await loadFortebetAccount(12_000)).ok) return {ok:false,message:'Sign in to read your messages.'};
+  return loadClientRecord('/client/messages/detail', {messageId,lang:'EN'});
+}
+export async function submitAccountProfile(input:ProfileChanges):Promise<AccountActionResult> {
+  if (!(await loadFortebetAccount(12_000)).ok) return {ok:false,message:'Sign in again before saving changes.'};
+  try {
+    const current = await loadClientRecord('/client/profile/get');
+    if (!current.ok || !current.data || typeof current.data !== 'object' || Array.isArray(current.data)) return {ok:false,message:'Unable to load your profile before saving. Please try again.'};
+    const existing = current.data['contact'];
+    if (!existing || typeof existing !== 'object' || Array.isArray(existing)) return {ok:false,message:'Unable to load your contact details.'};
+    const previous = existing['address'];
+    const address = Array.isArray(previous) ? previous : previous && typeof previous === 'object' ? [previous] : [];
+    const main = address.find(a=>a && typeof a === 'object' && !Array.isArray(a) && a['addressType']==='MAIN');
+    const savedAddress = main && typeof main === 'object' && !Array.isArray(main) ? main : {};
+    const personalInfo = {contact:{firstName:input.firstName,lastName:input.lastName,email:input.email,phone:existing['phone'],address:[{...savedAddress,addressType:savedAddress['addressType'] || 'MAIN',streetName:input.streetName,city:input.city,zipcode:input.zipcode},...address.filter(a=>a!==main)]}};
+    const result = await requestFortebet('/client/profile/set','POST',{password:input.currentPassword,personalInfo},12_000);
+    const detail = result.payload?.data as Record<string,unknown> | null;
+    if (!result.response.ok || result.payload?.status !== 'OK' || detail?.['result'] !== true) return {ok:false,message:apiFailureMessage(result.payload,'Your profile changes were not accepted.')};
+    if (input.newPassword) {
+      const changed = await requestFortebet('/client/password/change','POST',{oldPassword:input.currentPassword,newPassword:input.newPassword,newPasswordConfirm:input.newPasswordAgain},12_000);
+      const outcome = changed.payload?.data;
+      if (!changed.response.ok || changed.payload?.status !== 'OK' || !outcome || typeof outcome === 'object' && (outcome as Record<string,unknown>)['result'] === false) return {ok:false,message:'Profile saved, but the password change was not accepted. Please check your password and try again.'};
+    }
+    return {ok:true,message:input.newPassword?'Profile and password saved.':'Profile saved.'};
+  } catch {return {ok:false,message:'Unable to complete your changes. Refresh your profile before trying again.'};}
 }
 
 export async function submitFortebetLogout(): Promise<AccountActionResult> {
