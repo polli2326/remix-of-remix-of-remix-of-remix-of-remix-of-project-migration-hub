@@ -145,7 +145,8 @@ export function parseBetPlacementResult(payload: unknown, httpOk: boolean): BetP
   }
 
   if (result !== "SB_AUTH_REJECTED" && result !== "SB_CHECK_FAILED") {
-    return { status: "unknown", idTicket: text(data["idTicket"]) || undefined, message: UNCONFIRMED_BET_MESSAGE };
+    const idTicket = text(data["idTicket"]);
+    return { status: "unknown", ...(idTicket ? { idTicket } : {}), message: UNCONFIRMED_BET_MESSAGE };
   }
 
   const checks = Array.isArray(data["check"]) ? data["check"] : [];
