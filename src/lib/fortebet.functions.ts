@@ -238,7 +238,8 @@ export const getMarketOffer = createServerFn({ method: "GET" })
 
 export type MarketDTO = { id: number; name: string; outcomes: { id: number; name: string; odds: number | null; locked: boolean }[] };
 /** One info tab Fortebet lists for a live event (TRACKER, TIMELINE, STATS, ...), Sportradar widget settings included. */
-export type LiveWidget = { name: string; type: string; objectType: string | null; url: string | null; params: Record<string, unknown> };
+export type WidgetJson = string | number | boolean | null | WidgetJson[] | { [k: string]: WidgetJson };
+export type LiveWidget = { name: string; type: string; objectType: string | null; url: string | null; params: { [k: string]: WidgetJson } };
 
 export const getEventDetail = createServerFn({ method: "GET" })
   .inputValidator((input: { id: string; live?: boolean }) => {
@@ -282,7 +283,7 @@ export const getEventDetail = createServerFn({ method: "GET" })
         type: String(w.type ?? ""),
         objectType: w.objectType ? String(w.objectType) : null,
         url: typeof w.url === "string" && /^https:\/\//.test(w.url) ? w.url : null,
-        params: w.params && typeof w.params === "object" ? w.params : {},
+        params: w.params && typeof w.params === "object" ? (JSON.parse(JSON.stringify(w.params)) as { [k: string]: WidgetJson }) : {},
       }));
     return {
       at: Math.min(detail.at, full.at),
