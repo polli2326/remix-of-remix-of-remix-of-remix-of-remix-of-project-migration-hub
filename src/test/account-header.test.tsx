@@ -1,72 +1,13 @@
-import { afterEach, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
-
-const accountApi = vi.hoisted(() => ({
-  getAccount: vi.fn(),
-  pending: vi.fn(),
-  logout: vi.fn(),
-  deposit: vi.fn(),
-  payout: vi.fn(),
-}));
-
-vi.mock("@/lib/account.functions", () => ({
-  getFortebetAccount: accountApi.getAccount,
-  getPendingMobileMoney: accountApi.pending,
-  logoutFromFortebet: accountApi.logout,
-  requestMobileMoneyDeposit: accountApi.deposit,
-  requestMobileMoneyPayout: accountApi.payout,
-}));
-
-import { AccountHeader } from "@/components/account-header";
-import { setAccountSession } from "@/lib/account-state";
-
-const account = {
-  nickname: "sample-user",
-  displayName: "Sample User",
-  balance: 25_000,
-  currency: "UGX",
-};
-
-afterEach(() => {
-  cleanup();
-  setAccountSession(null);
-  vi.clearAllMocks();
-});
-
-it("opens the authenticated dropdown and submits a deposit through the server action", async () => {
-  accountApi.pending.mockResolvedValue({ ok: true, requests: [] });
-  accountApi.deposit.mockResolvedValue({ ok: true, message: "Deposit request accepted." });
-  accountApi.getAccount.mockResolvedValue({ ok: true, account });
-  setAccountSession(account);
-
-  render(<AccountHeader />);
-  fireEvent.click(await screen.findByRole("menuitem", { name: "Deposit" }));
-
-  fireEvent.change(await screen.findByLabelText("Amount (UGX)"), { target: { value: "5000" } });
-  fireEvent.submit(screen.getByLabelText("Amount (UGX)").closest("form") as HTMLFormElement);
-
-  await waitFor(() => {
-    expect(accountApi.deposit).toHaveBeenCalledWith({ data: { amount: 5000 } });
-  });
-  expect(await screen.findByText("Deposit request accepted.")).toBeTruthy();
-  expect(accountApi.pending).toHaveBeenCalledWith({ data: { kind: "payin" } });
-});
-
-it("submits a withdrawal request from the authenticated dropdown", async () => {
-  accountApi.pending.mockResolvedValue({ ok: true, requests: [] });
-  accountApi.payout.mockResolvedValue({ ok: true, message: "Withdrawal request accepted." });
-  accountApi.getAccount.mockResolvedValue({ ok: true, account });
-  setAccountSession(account);
-
-  render(<AccountHeader />);
-  fireEvent.click(await screen.findByRole("menuitem", { name: "Withdraw" }));
-
-  fireEvent.change(await screen.findByLabelText("Amount (UGX)"), { target: { value: "5000" } });
-  fireEvent.submit(screen.getByLabelText("Amount (UGX)").closest("form") as HTMLFormElement);
-
-  await waitFor(() => {
-    expect(accountApi.payout).toHaveBeenCalledWith({ data: { amount: 5000 } });
-  });
-  expect(await screen.findByText("Withdrawal request accepted.")).toBeTruthy();
-  expect(accountApi.pending).toHaveBeenCalledWith({ data: { kind: "payout" } });
-});
+import { afterEach, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+const api = vi.hoisted(()=>({getAccount:vi.fn(),activity:vi.fn(),pending:vi.fn(),logout:vi.fn(),deposit:vi.fn(),payout:vi.fn()}));
+vi.mock('@/lib/account.functions',()=>({getFortebetAccount:api.getAccount,getSignedInAccountActivity:api.activity,getPendingMobileMoney:api.pending,logoutFromFortebet:api.logout,requestMobileMoneyDeposit:api.deposit,requestMobileMoneyPayout:api.payout}));
+vi.mock('@/components/live-shell',()=>({LiveShell:({children}:{children:React.ReactNode})=><div>{children}</div>}));
+import { AccountPages } from '@/components/account-pages';
+import { setAccountSession } from '@/lib/account-state';
+const account={nickname:'sample-user',displayName:'Sample User',balance:25000,currency:'UGX'};
+afterEach(()=>{cleanup();setAccountSession(null);vi.clearAllMocks();});
+function setup(path:string){api.pending.mockResolvedValue({ok:true,requests:[]});api.activity.mockResolvedValue({ok:true,account,profile:{ok:true,data:{contact:{phone:'+256700000000'}}},transactions:{ok:true,data:[]},tickets:{ok:true,data:[]},messages:{ok:true,data:[]}});setAccountSession(account);render(<AccountPages path={path}/>);}
+it('submits the existing deposit action from the MTN account page',async()=>{api.deposit.mockResolvedValue({ok:true,message:'Deposit request accepted.'});setup('deposits/mtn');await waitFor(()=>expect(screen.getByRole('button',{name:'DEPOSIT',exact:true}).hasAttribute('disabled')).toBe(false));fireEvent.change(screen.getByLabelText('AMOUNT (UGX)'),{target:{value:'5000'}});fireEvent.submit(screen.getByLabelText('AMOUNT (UGX)').closest('form') as HTMLFormElement);await waitFor(()=>expect(api.deposit).toHaveBeenCalledWith({data:{amount:5000}}));expect(api.pending).toHaveBeenCalledWith({data:{kind:'payin'}});});
+it('submits the existing withdrawal action from the account page',async()=>{api.payout.mockResolvedValue({ok:true,message:'Withdrawal request accepted.'});setup('withdrawals/mtn');await waitFor(()=>expect(screen.getByRole('button',{name:'WITHDRAW',exact:true}).hasAttribute('disabled')).toBe(false));fireEvent.change(screen.getByLabelText('AMOUNT (UGX)'),{target:{value:'5000'}});fireEvent.submit(screen.getByLabelText('AMOUNT (UGX)').closest('form') as HTMLFormElement);await waitFor(()=>expect(api.payout).toHaveBeenCalledWith({data:{amount:5000}}));expect(api.pending).toHaveBeenCalledWith({data:{kind:'payout'}});});
+it('does not send another payment when the user already has a pending request',async()=>{api.pending.mockResolvedValue({ok:true,requests:[{reference:'pending',amount:5000,requestTimestamp:'2026-11-07'}]});api.activity.mockResolvedValue({ok:false,message:'Unavailable'});setAccountSession(account);render(<AccountPages path="deposits/airtel"/>);await screen.findByRole('status');expect(screen.getByRole('button',{name:'DEPOSIT',exact:true}).hasAttribute('disabled')).toBe(true);expect(api.deposit).not.toHaveBeenCalled();});

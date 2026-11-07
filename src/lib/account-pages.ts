@@ -7,7 +7,7 @@ export function recordRows(record?: FortebetClientRecord): Record<string, Forteb
   if (!record?.ok) return [];
   const data = record.data;
   const object = recordObject(data);
-  const rows = Array.isArray(data) ? data : object.items ?? object.records ?? object.tickets ?? object.messages ?? [];
+  const rows = Array.isArray(data) ? data : object['items'] ?? object['records'] ?? object['tickets'] ?? object['messages'] ?? [];
   return Array.isArray(rows) ? rows.map(recordObject) : [];
 }
 export function accountText(value: unknown) { return typeof value === 'string' || typeof value === 'number' ? String(value) : ''; }
