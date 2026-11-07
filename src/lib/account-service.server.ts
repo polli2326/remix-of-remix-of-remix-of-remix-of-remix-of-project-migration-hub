@@ -373,9 +373,9 @@ export async function submitAccountProfile(input:ProfileChanges):Promise<Account
     if (!existing || typeof existing !== 'object' || Array.isArray(existing)) return {ok:false,message:'Unable to load your contact details.'};
     const previous = existing['address'];
     const address = Array.isArray(previous) ? previous : previous && typeof previous === 'object' ? [previous] : [];
-    const main = address.find(a=>a && typeof a === 'object' && !Array.isArray(a) && a['addressType']==='MAIN');
+    const main = address.find(a=>a && typeof a === 'object' && !Array.isArray(a) && a['addressType']==='MAIN') ?? address[0];
     const savedAddress = main && typeof main === 'object' && !Array.isArray(main) ? main : {};
-    const personalInfo = {contact:{firstName:input.firstName,lastName:input.lastName,email:input.email,phone:existing['phone'],address:[{...savedAddress,addressType:savedAddress['addressType'] || 'MAIN',streetName:input.streetName,city:input.city,zipcode:input.zipcode},...address.filter(a=>a!==main)]}};
+    const personalInfo = {contact:{title:input.title,firstName:input.firstName,lastName:input.lastName,email:input.email,phone:existing['phone'],address:[{...savedAddress,addressType:savedAddress['addressType'] || 'MAIN',streetName:input.streetName,city:input.city,zipcode:input.zipcode},...address.filter(a=>a!==main)]}};
     const result = await requestFortebet('/client/profile/set','POST',{password:input.currentPassword,personalInfo},12_000);
     const detail = result.payload?.data as Record<string,unknown> | null;
     if (!result.response.ok || result.payload?.status !== 'OK' || detail?.['result'] !== true) return {ok:false,message:apiFailureMessage(result.payload,'Your profile changes were not accepted.')};

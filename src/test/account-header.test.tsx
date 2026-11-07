@@ -2,7 +2,7 @@ import { afterEach, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 const api = vi.hoisted(()=>({getAccount:vi.fn(),activity:vi.fn(),pending:vi.fn(),logout:vi.fn(),deposit:vi.fn(),payout:vi.fn(),branch:vi.fn(),save:vi.fn(),records:vi.fn(),message:vi.fn()}));
 vi.mock('@/lib/account.functions',()=>({getFortebetAccount:api.getAccount,getSignedInAccountActivity:api.activity,getPendingMobileMoney:api.pending,logoutFromFortebet:api.logout,requestMobileMoneyDeposit:api.deposit,requestMobileMoneyPayout:api.payout,requestBranchWithdrawal:api.branch,saveAccountProfile:api.save,getAccountRecords:api.records,getAccountMessage:api.message}));
-vi.mock('@tanstack/react-start',()=>({useServerFn:(fn:unknown)=>fn}));
+vi.mock('@tanstack/react-start',async(importOriginal)=>({...await importOriginal<typeof import('@tanstack/react-start')>(),useServerFn:(fn:unknown)=>fn}));
 vi.mock('@/components/live-shell',()=>({LiveShell:({children}:{children:React.ReactNode})=><div>{children}</div>}));
 import { AccountPages } from '@/components/account-pages';
 import { setAccountSession } from '@/lib/account-state';
