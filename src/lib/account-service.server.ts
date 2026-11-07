@@ -481,6 +481,12 @@ export async function submitFortebetRegistration(
       data: registrationData,
     });
     const result = payload?.data as Record<string, unknown> | null | undefined;
+    const checks = Array.isArray(result?.["checks"]) ? (result!["checks"] as Record<string, unknown>[]) : [];
+    console.info("[register] fortebet reply", JSON.stringify({
+      http: response.status, status: payload?.status, code: (payload as Record<string, unknown> | null)?.["code"],
+      result: result?.["result"], error: result?.["error"],
+      checks: checks.map((c) => `${String(c?.["attr_name"])}:${String(c?.["error"])}`),
+    }));
     if (response.ok && payload?.status === "OK" && result?.["result"] === true) {
       return { ok: true, message: "Registration complete. You can now log in." };
     }
@@ -491,10 +497,11 @@ export async function submitFortebetRegistration(
       ok: false,
       message: apiFailureMessage(
         payload,
-        "Registration could not be completed. Check your details and try again.",
+        `Fortebet did not accept the registration right now (code ${response.status}). Please try again in a moment.`,
       ),
     };
-  } catch {
+  } catch (error) {
+    console.error("[register] request failed", error instanceof Error ? error.message : String(error));
     return { ok: false, message: "Unable to reach the account service. Please try again." };
   }
 }
