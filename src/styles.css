@@ -731,57 +731,63 @@ body:has(.virtual-viewer) .virtual-soccer-offer-header > div:first-child > span:
   margin-left: 0;
 }
 
-/* Keep every logged-in header item on one centered line */
-.account-header-authenticated div.user {
+/* Keep every logged-in header item on one centered line.
+   NOTE: the imported site.css is injected inline after this file, so these
+   rules use doubled class specificity to win over its per-element offsets. */
+.account-header-entry.account-header-authenticated div.user {
   display: flex;
   align-items: center;
   top: 0;
+  bottom: 0;
   padding-left: calc(11px * var(--factor, 1));
 }
-.account-header-authenticated div.user > a {
+.account-header-entry.account-header-authenticated div.user > a {
   display: inline-flex;
   align-items: center;
+  top: 0;
   bottom: 0;
   margin: 0 calc(7px * var(--factor, 1));
 }
-.account-header-authenticated div.user > div {
+.account-header-entry.account-header-authenticated div.user > div {
   display: flex;
   align-items: center;
   padding-top: 0;
+  top: 0;
   bottom: 0;
 }
-.account-header-authenticated div.user icon,
-.account-header-authenticated div.user > div > icon {
+.account-header-entry.account-header-authenticated div.user icon,
+.account-header-entry.account-header-authenticated div.user > div > icon {
+  top: 0;
   bottom: 0;
   display: inline-flex;
   align-items: center;
 }
-.account-header-authenticated div.user span.separator {
+.account-header-entry.account-header-authenticated div.user span.separator {
   align-self: center;
   height: calc(18px * var(--factor, 1));
 }
-.account-header-authenticated div.user span.separator::after {
+.account-header-entry.account-header-authenticated div.user span.separator::after {
   position: static;
   height: calc(18px * var(--factor, 1));
 }
-.account-header-authenticated div.user > div > div.balanceVisible {
+.account-header-entry.account-header-authenticated div.user > div > div.balanceVisible {
   display: contents;
 }
-.account-header-authenticated div.user > div > div.balanceVisible svg.reload {
+.account-header-entry.account-header-authenticated div.user > div > div.balanceVisible svg.reload {
   align-self: center;
 }
-.account-header-authenticated div.user > div > div.balanceVisible label,
-.account-header-authenticated div.user > div > div.balanceHidden label {
+.account-header-entry.account-header-authenticated div.user > div > div.balanceVisible label,
+.account-header-entry.account-header-authenticated div.user > div > div.balanceHidden label {
   display: inline-flex;
   align-items: center;
   margin: 0;
 }
-.account-header-authenticated .header__messages {
+.account-header-entry.account-header-authenticated .header__messages {
   display: inline-flex;
   align-items: center;
   margin: 0 calc(10px * var(--factor, 1));
 }
-.account-header-authenticated .buttons {
+.account-header-entry.account-header-authenticated .buttons {
   display: flex;
   align-items: center;
 }
