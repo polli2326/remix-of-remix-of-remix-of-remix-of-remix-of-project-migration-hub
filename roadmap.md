@@ -1,4 +1,5 @@
 # Account page matching
+- [ ] Deliver one copy-and-paste Railway payment file with configuration instructions and verified safeguards.
 - [x] Prepare a standalone authenticated Relworx payment service and Railway deployment instructions; 25 checks pass with PostgreSQL and simulated provider responses, no real money moved.
 - [ ] Connect website payments to Railway: waiting for deployed URL and verified user-token issuer configuration; real Relworx payments remain unverified.
 - [ ] Connect the new wallet to real-money betting, virtual games and Aviator: blocked on authorized operator/game-provider wallet contracts and credentials.
