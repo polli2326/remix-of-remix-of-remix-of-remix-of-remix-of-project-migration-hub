@@ -146,7 +146,7 @@ export function parseBetPlacementResult(payload: unknown, httpOk: boolean): BetP
   const checks = Array.isArray(data["check"]) ? data["check"] : [];
   const codes = checks.flatMap((check) => {
     if (!check || typeof check !== "object") return [];
-    const code = text((check as Record<string, unknown>).code);
+    const code = text((check as Record<string, unknown>)["code"]);
     return code ? [code] : [];
   });
   const code = codes[0] || result || envelopeCode || "SB_CHECK_FAILED";
