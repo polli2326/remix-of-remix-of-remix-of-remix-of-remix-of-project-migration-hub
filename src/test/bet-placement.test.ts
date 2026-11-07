@@ -76,6 +76,11 @@ describe("Fortebet result handling", () => {
     expect(parseBetPlacementResult({ status: "OK", data: { result: "SB_AUTH_ACCEPTED", ticket: { number: "T-900", shortNumber: "900" } } }, true)).toMatchObject({ status: "accepted", ticket: { number: "T-900", shortNumber: "900" } });
   });
 
+  it("treats an empty or unrecognised submission answer as unconfirmed", () => {
+    expect(parseBetPlacementResult(null, true)).toEqual({ status: "unknown", message: UNCONFIRMED_BET_MESSAGE });
+    expect(parseBetPlacementResult({ status: "OK", data: {} }, true)).toEqual({ status: "unknown", message: UNCONFIRMED_BET_MESSAGE });
+  });
+
   it("does not treat a pending bet as placed", () => {
     expect(parseBetPlacementResult({ status: "OK", data: { result: "SB_AUTH_PENDING", idTicket: 7654 } }, true)).toEqual({ status: "pending", idTicket: "7654", message: "Fortebet is authorising this bet. Do not submit it again." });
   });

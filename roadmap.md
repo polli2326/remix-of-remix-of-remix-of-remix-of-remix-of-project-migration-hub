@@ -1,5 +1,6 @@
 # Account page matching
-- [ ] Place Bet submits the confirmed slip through the signed-in Fortebet account and shows only real Fortebet results; verify safeguards without placing a real wager.
+- [x] Place Bet submits the confirmed slip through the signed-in Fortebet account and shows only real Fortebet results; safeguards and UI verified without placing a real wager.
+- [ ] Verify a successful real-money bet and balance update: requires the account owner to confirm an actual wager.
 - [ ] Live match statistics: use each match's own Fortebet statistics widget (currently one fixed statistics window).
 - [x] Live page navigation (sport tabs, search, My selection, Schedule) works like fortebet.ug
 - [x] Virtual nav item shows the real current virtual game + countdown on every page

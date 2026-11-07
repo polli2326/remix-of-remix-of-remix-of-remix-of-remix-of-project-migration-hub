@@ -118,7 +118,8 @@ export function betFailureMessage(code: string) {
 
 /** Maps only Fortebet's explicit SB_AUTH_ACCEPTED state to success. */
 export function parseBetPlacementResult(payload: unknown, httpOk: boolean): BetPlacementResult {
-  const root = payload && typeof payload === "object" ? (payload as Record<string, unknown>) : {};
+  if (!payload || typeof payload !== "object") return { status: "unknown", message: UNCONFIRMED_BET_MESSAGE };
+  const root = payload as Record<string, unknown>;
   const envelopeCode = text(root["code"]);
   if (!httpOk || root["status"] !== "OK") {
     return { status: "rejected", code: envelopeCode || "ERR_INTERNAL", message: betFailureMessage(envelopeCode) };
@@ -149,7 +150,8 @@ export function parseBetPlacementResult(payload: unknown, httpOk: boolean): BetP
     const code = text((check as Record<string, unknown>)["code"]);
     return code ? [code] : [];
   });
-  const code = codes[0] || result || envelopeCode || "SB_CHECK_FAILED";
+  const code = codes[0] || result || envelopeCode;
+  if (!code) return { status: "unknown", message: UNCONFIRMED_BET_MESSAGE };
   return { status: "rejected", code, message: betFailureMessage(code) };
 }
 
