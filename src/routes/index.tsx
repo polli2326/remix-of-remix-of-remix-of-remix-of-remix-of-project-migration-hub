@@ -1,12 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { AccountHeader } from "@/components/account-header";
-import { BannerSlider, BetSlip, useSels, OfferCenter, HeaderClock, LiveOddsFeed } from "@/components/fortebet-live";
+import { BannerSlider, BetSlip, useSels, OfferCenter, HeaderClock, LiveOddsFeed, prematchQuery, liveQuery, bannersQuery } from "@/components/fortebet-live";
 import { openRegister } from "@/lib/login-modal";
 import { Button } from "@/components/ui/button";
 import { TicketSearch } from "@/components/ticket-check";
 import { OfferSearch, DateFilter, OddsRange, TopBetsList, MySelection, SportsList } from "@/components/offer-sidebar";
 import { OfferFilterProvider } from "@/components/offer-context";
+import { VirtualNavItem } from "@/components/virtual-nav";
 import capturedCSS from "../styles/site.css?raw";
 
 const ImportedNativeTag0 = "sbticket" as import("react").ElementType;
@@ -20,6 +21,12 @@ export const Route = createFileRoute("/")({
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary_large_image" },
   ] }),
+  // Matches, live odds and banners load on the server and arrive with the page.
+  loader: ({ context }) => Promise.all([
+    context.queryClient.ensureQueryData(prematchQuery),
+    context.queryClient.ensureQueryData(liveQuery),
+    context.queryClient.ensureQueryData(bannersQuery),
+  ]).then(() => null),
   staticData: { importedDocument: { html: { "lang": "en" }, body: { "data-site-import-responsive-incomplete": "scroll" } } },
   component: Index,
 });
@@ -358,16 +365,7 @@ function Index() {
                   </li>
                   <li {...({ "_ngcontent-oky-c206": "" } as any)}>
                     <a className="withIco" href="/virtual-soccer" {...({ "_ngcontent-oky-c206": "", routerlinkactive: "active" } as any)}>
-                      <div data-ce="app-virtual-soccer-sec-header" {...({ "_ngcontent-oky-c206": "" } as any)}>
-                        <div>
-                          <icon {...({ href: "#icoSportVirtualsoccer", classname: "current h30", "_nghost-oky-c39": "" } as any)}>
-                            <svg className="current h30 align-middle" viewBox="0 0 100 100" {...({ "_ngcontent-oky-c39": "" } as any)}>
-                              <use xlinkHref="#icoSportVirtualsoccer" {...({ "_ngcontent-oky-c39": "" } as any)} />
-                            </svg>
-                          </icon>
-                        </div>
-                        <div> B.M-Lev <br /><span>03:13</span></div>
-                      </div>
+                      <VirtualNavItem />
                     </a>
                   </li>
                   <li {...({ "_ngcontent-oky-c206": "" } as any)}>

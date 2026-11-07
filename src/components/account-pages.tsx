@@ -122,7 +122,7 @@ function OtherNumberDeposit({provider}: {provider: string}) {
   }
   return <form className="fb-inline-payment" onSubmit={submit} aria-label="Deposit from another number">
     <div><label htmlFor="fb-other-phone">OTHER PHONE NUMBER</label><input id="fb-other-phone" type="tel" inputMode="tel" required value={phone} onChange={e=>{setPhone(e.target.value);setReady(false);}} placeholder={`0${mtn?'77':'70'}XXXXXXX`}/></div>
-    <div><label htmlFor="fb-other-amount">AMOUNT (UGX)</label><input id="fb-other-amount" type="number" inputMode="numeric" required min={1000} max={5000000} step={1} value={amount} onChange={e=>{setAmount(e.target.value);setReady(false);}} placeholder="Enter your requested amount"/><Button className="fb-account-action" type="submit">DEPOSIT</Button></div>
+    <div><label htmlFor="fb-other-amount">AMOUNT TO SEND (UGX)</label><input id="fb-other-amount" type="number" inputMode="numeric" required min={1000} max={5000000} step={1} value={amount} onChange={e=>{setAmount(e.target.value);setReady(false);}} placeholder="Enter your requested amount"/><Button className="fb-account-action" type="submit">SHOW STEPS</Button></div>
     {error && <p role="alert">{error}</p>}
     {ready && <p role="status">On the phone {phone}, dial <a href={`tel:${encodeURIComponent(code)}`}><strong>{code}</strong></a> and follow the steps below to pay {Number(amount).toLocaleString()} UGX. Use your username as the reference, then call 0800 202 202 or 0800 303 303 so your account is credited.</p>}
   </form>;

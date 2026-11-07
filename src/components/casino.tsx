@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { queryOptions, useQuery } from "@tanstack/react-query";
-import { useHydrated, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { CASINO_ASSETS, CASINO_IMG, getCasinoGames, getCasinoJackpots, getCasinoWinners, playCasinoGame, type CasinoGame } from "@/lib/fortebet.functions";
 import { availableKeys, CASINO_CATEGORIES, CASINO_PROVIDERS, DEFAULT_CASINO_FILTER, filterGames, isFiltered, jackpotCounter, jackpotStart, popularGames, type CasinoFilter } from "@/lib/casino";
@@ -151,10 +151,9 @@ function GameTile({ g, onPlay }: { g: CasinoGame; onPlay: (g: CasinoGame) => voi
 export function CasinoLobby() {
   const nav = useNavigate();
   const q = useQuery(casinoGamesQuery);
-  // Server-loaded games are not handed to the browser, so wait for hydration to keep both renders identical.
-  const hydrated = useHydrated();
-  const data = hydrated ? q.data : undefined;
-  const isLoading = !hydrated || q.isLoading;
+  // Games are loaded on the server and sent with the page, so the lobby opens already filled.
+  const data = q.data;
+  const isLoading = q.isLoading;
   const games = data?.games ?? [];
   const [f, setF] = useState<CasinoFilter>(DEFAULT_CASINO_FILTER);
   const popular = useMemo(() => popularGames(games), [games]);
@@ -205,9 +204,9 @@ export function CasinoLobby() {
 type Launch = { state: "loading" } | { state: "ready"; url: string } | { state: "login" } | { state: "error" };
 
 /** Floating game window, like Fortebet's /slots/game/{game}. Demo (fun) mode needs no account. */
-export function GameModal({ ident, mode, onMode, onClose }: { ident: string; mode: "fun" | "real"; onMode: (m: "fun" | "real") => void; onClose: () => void }) {
+export function GameModal({ ident, gameId, backPath = "/slots", backLabel = "Back to all games", mode, onMode, onClose }: { ident?: string; gameId?: number; backPath?: string; backLabel?: string; mode: "fun" | "real"; onMode: (m: "fun" | "real") => void; onClose: () => void }) {
   const { data } = useQuery(casinoGamesQuery);
-  const game = data?.games.find((g) => g.ident === ident || g.ident.toLowerCase() === ident.toLowerCase());
+  const game = data?.games.find((g) => (gameId != null ? g.id === gameId : g.ident === ident || g.ident.toLowerCase() === (ident ?? "").toLowerCase()));
   const start = useServerFn(playCasinoGame);
   const [launch, setLaunch] = useState<Launch>({ state: "loading" });
   const [tries, setTries] = useState(0);
@@ -216,7 +215,7 @@ export function GameModal({ ident, mode, onMode, onClose }: { ident: string; mod
     if (!game) return;
     let live = true;
     setLaunch({ state: "loading" });
-    const backUrl = `${window.location.origin}/slots`;
+    const backUrl = `${window.location.origin}${backPath}`;
     start({ data: { gameId: game.id, mode, backUrl } })
       .then((r) => { if (live) setLaunch(r.ok ? { state: "ready", url: r.url } : r.error === "LOGIN_REQUIRED" ? { state: "login" } : { state: "error" }); })
       .catch(() => { if (live) setLaunch({ state: "error" }); });
@@ -237,7 +236,7 @@ export function GameModal({ ident, mode, onMode, onClose }: { ident: string; mod
       <style>{CSS}</style>
       <div className="box">
         <div className="bar">
-          <span className="name">{game?.name ?? ident}</span>
+          <span className="name">{game?.name ?? ident ?? "Game"}</span>
           {game?.playFun && <button type="button" className={`tag ${mode === "fun" ? "on" : ""}`} onClick={() => onMode("fun")}>Play for fun</button>}
           {game?.playReal && <button type="button" className={`tag ${mode === "real" ? "on" : ""}`} onClick={() => onMode("real")}>Play for real</button>}
           {launch.state === "ready" && <a href={launch.url} target="_blank" rel="noopener noreferrer">Open in new window ↗</a>}
@@ -245,7 +244,7 @@ export function GameModal({ ident, mode, onMode, onClose }: { ident: string; mod
         </div>
         <div className="stage">
           {notFound ? (
-            <div className="msg"><h3>Game not found</h3>This game is not available right now.<div className="btns"><button type="button" onClick={onClose}>Back to all games</button></div></div>
+            <div className="msg"><h3>Game not found</h3>This game is not available right now.<div className="btns"><button type="button" onClick={onClose}>{backLabel}</button></div></div>
           ) : !game || launch.state === "loading" ? (
             <div className="msg"><div className="spin" />Starting {game?.name ?? "game"}…</div>
           ) : launch.state === "ready" ? (
@@ -256,14 +255,14 @@ export function GameModal({ ident, mode, onMode, onClose }: { ident: string; mod
               Playing for real money needs a signed-in Fortebet account.{game.playFun ? " You can still try the game for free." : ""}
               <div className="btns">
                 {game.playFun && <button type="button" onClick={() => onMode("fun")}>Play for fun</button>}
-                <button type="button" className="ghost" onClick={onClose}>Back to all games</button>
+                <button type="button" className="ghost" onClick={onClose}>{backLabel}</button>
               </div>
             </div>
           ) : (
             <div className="msg">
               <h3>Game unavailable</h3>
               {mode === "fun" && !game.playFun ? "This game has no free demo." : "The game could not be started. Please try again."}
-              <div className="btns"><button type="button" onClick={() => setTries((t) => t + 1)}>Try again</button><button type="button" className="ghost" onClick={onClose}>Back to all games</button></div>
+              <div className="btns"><button type="button" onClick={() => setTries((t) => t + 1)}>Try again</button><button type="button" className="ghost" onClick={onClose}>{backLabel}</button></div>
             </div>
           )}
         </div>

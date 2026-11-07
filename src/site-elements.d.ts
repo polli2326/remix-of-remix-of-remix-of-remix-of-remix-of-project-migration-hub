@@ -5,6 +5,7 @@ declare module "react" {
   namespace JSX {
     interface IntrinsicElements {
       icon: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
+      innerscroll: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
     }
   }
 }

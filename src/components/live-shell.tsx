@@ -2,13 +2,14 @@ import type { ReactNode } from "react";
 import { AccountHeader } from "@/components/account-header";
 import { HeaderClock, LiveOddsFeed } from "@/components/fortebet-live";
 import { TicketSearch } from "@/components/ticket-check";
+import { LiveToolbar } from "@/components/live-toolbar";
+import { VirtualNavItem } from "@/components/virtual-nav";
 import { openRegister } from "@/lib/login-modal";
 import { Button } from "@/components/ui/button";
 import capturedCSS from "../styles/pages/live.preview.css?raw";
 
-const ImportedNativeTag0 = "innerscroll" as import("react").ElementType;
 
-type NavKey = "sportsbook" | "live" | "slots" | "account";
+type NavKey = "sportsbook" | "live" | "virtual" | "slots" | "aviator" | "account";
 
 export function LiveShell({ children, slip, active = "live", layout = "ticket" }: { children: ReactNode; slip?: ReactNode; active?: NavKey; layout?: "ticket" | "full" }) {
   const navCls = (k: NavKey) => (k === active ? "active" : "");
@@ -342,24 +343,15 @@ export function LiveShell({ children, slip, active = "live", layout = "ticket" }
                     <a className={navCls("live")} href="/live/preview" {...({ "_ngcontent-wbi-c206": "", routerlinkactive: "active" } as any)}>Live</a>
                   </li>
                   <li {...({ "_ngcontent-wbi-c206": "" } as any)}>
-                    <a className="withIco" href="/virtual-soccer" {...({ "_ngcontent-wbi-c206": "", routerlinkactive: "active" } as any)}>
-                      <div data-ce="app-virtual-soccer-sec-header" {...({ "_ngcontent-wbi-c206": "" } as any)}>
-                        <div>
-                          <icon {...({ href: "https://www.fortebet.ug/#icoSportVirtualsoccer", classname: "current h30", "_nghost-wbi-c39": "" } as any)}>
-                            <svg className="current h30 align-middle" viewBox="0 0 100 100" {...({ "_ngcontent-wbi-c39": "" } as any)}>
-                              <use xlinkHref="#icoSportVirtualsoccer" {...({ "_ngcontent-wbi-c39": "" } as any)} />
-                            </svg>
-                          </icon>
-                        </div>
-                        <div> Lyo-Mon <br /><span>02:00</span></div>
-                      </div>
+                    <a className={`withIco ${navCls("virtual")}`} href="/virtual-soccer" {...({ "_ngcontent-wbi-c206": "", routerlinkactive: "active" } as any)}>
+                      <VirtualNavItem iconHref="https://www.fortebet.ug/#icoSportVirtualsoccer" />
                     </a>
                   </li>
                   <li {...({ "_ngcontent-wbi-c206": "" } as any)}>
                     <a className={navCls("slots")} href="/slots" {...({ "_ngcontent-wbi-c206": "", routerlinkactive: "active" } as any)}>All Games</a>
                   </li>
                   <li {...({ "_ngcontent-wbi-c206": "" } as any)}>
-                    <a className="withIco" href="/aviator" {...({ "_ngcontent-wbi-c206": "", routerlinkactive: "active" } as any)}><icon {...({ "_ngcontent-wbi-c206": "", href: "https://www.fortebet.ug/#icoSportAviator", classname: "h28 current", "_nghost-wbi-c39": "" } as any)}><svg className="current h28 align-middle" viewBox="0 0 100 100" {...({ "_ngcontent-wbi-c39": "" } as any)}><use xlinkHref="#icoSportAviator" {...({ "_ngcontent-wbi-c39": "" } as any)} /></svg></icon> Aviator </a>
+                    <a className={`withIco ${navCls("aviator")}`} href="/aviator" {...({ "_ngcontent-wbi-c206": "", routerlinkactive: "active" } as any)}><icon {...({ "_ngcontent-wbi-c206": "", href: "https://www.fortebet.ug/#icoSportAviator", classname: "h28 current", "_nghost-wbi-c39": "" } as any)}><svg className="current h28 align-middle" viewBox="0 0 100 100" {...({ "_ngcontent-wbi-c39": "" } as any)}><use xlinkHref="#icoSportAviator" {...({ "_ngcontent-wbi-c39": "" } as any)} /></svg></icon> Aviator </a>
                   </li>
                   <li {...({ "_ngcontent-wbi-c206": "" } as any)}>
                     <a href="/doc/bestshots" {...({ "_ngcontent-wbi-c206": "", routerlinkactive: "active" } as any)}> Best Shots </a>
@@ -373,51 +365,7 @@ export function LiveShell({ children, slip, active = "live", layout = "ticket" }
             </div>
             {layout === "ticket" && (
             <div className="live live--sticky [top:calc(104px_*_var(--factor))]" {...({ "_ngcontent-wbi-c209": "" } as any)}>
-              <div className="live__head" {...({ "_ngcontent-wbi-c209": "" } as any)}>
-                <div className="[min-width:calc(39px_*_var(--factor))] [transition:width_0.2s_ease-in-out]" {...({ "_ngcontent-wbi-c209": "" } as any)}>
-                  <div data-ce="offer-search" {...({ "_ngcontent-wbi-c209": "", "_nghost-wbi-c41": "" } as any)}>
-                    <div className="searchOffer [font-weight:700]" {...({ "_ngcontent-wbi-c41": "" } as any)}>
-                      <input id="searchInputEl" name="searchOffer" type="text" placeholder="Looking for something?" autoComplete="off" {...({ "_ngcontent-wbi-c41": "" } as any)} />
-                      <label htmlFor="searchInputEl" {...({ "_ngcontent-wbi-c41": "" } as any)}>
-                        <icon {...({ "_ngcontent-wbi-c41": "", href: "https://www.fortebet.ug/#icoGlass", classname: "current h20", "_nghost-wbi-c39": "" } as any)}>
-                          <svg className="current h20 align-middle" viewBox="0 0 100 100" {...({ "_ngcontent-wbi-c39": "" } as any)}>
-                            <use xlinkHref="#icoGlass" {...({ "_ngcontent-wbi-c39": "" } as any)} />
-                          </svg>
-                        </icon>
-                      </label>
-                    </div>
-                  </div>
-                </div>
-                <div data-ce="offer-sport-filter" {...({ "_ngcontent-wbi-c209": "", "_nghost-wbi-c166": "" } as any)}>
-                  <div className="head baseLeft" {...({ "_ngcontent-wbi-c166": "" } as any)}>
-                    <ImportedNativeTag0 {...({ "_ngcontent-wbi-c166": "" } as any)}>
-                      <div {...({ "_ngcontent-wbi-c166": "" } as any)}>
-                        <div {...({ "_ngcontent-wbi-c166": "" } as any)}>
-                          <a {...({ "_ngcontent-wbi-c166": "" } as any)}><icon {...({ "_ngcontent-wbi-c166": "", classname: "gold h13", href: "https://www.fortebet.ug/#icoClientStarfull", "_nghost-wbi-c39": "" } as any)}><svg className="gold h13 align-middle" viewBox="0 0 100 100" {...({ "_ngcontent-wbi-c39": "" } as any)}><use xlinkHref="#icoClientStarfull" {...({ "_ngcontent-wbi-c39": "" } as any)} /></svg></icon> My selection <span className="counter items-center justify-center text-center [height:calc(18px_*_var(--factor))] [right:calc(10px_*_var(--factor))]!" {...({ "_ngcontent-wbi-c166": "" } as any)}>0</span></a>
-                        </div>
-                        <div className="active" {...({ "_ngcontent-wbi-c166": "" } as any)}>
-                          <a {...({ "_ngcontent-wbi-c166": "" } as any)}> Soccer <span className="counter items-center justify-center text-center [height:calc(18px_*_var(--factor))] [right:calc(10px_*_var(--factor))]!" {...({ "_ngcontent-wbi-c166": "" } as any)}>14</span></a>
-                        </div>
-                        <div {...({ "_ngcontent-wbi-c166": "" } as any)}>
-                          <a {...({ "_ngcontent-wbi-c166": "" } as any)}> Table Tennis <span className="counter items-center justify-center text-center [height:calc(18px_*_var(--factor))] [right:calc(10px_*_var(--factor))]!" {...({ "_ngcontent-wbi-c166": "" } as any)}>8</span></a>
-                        </div>
-                        <div {...({ "_ngcontent-wbi-c166": "" } as any)}>
-                          <a {...({ "_ngcontent-wbi-c166": "" } as any)}> E-Soccer <span className="counter items-center justify-center text-center [height:calc(18px_*_var(--factor))] [right:calc(10px_*_var(--factor))]!" {...({ "_ngcontent-wbi-c166": "" } as any)}>8</span></a>
-                        </div>
-                        <div {...({ "_ngcontent-wbi-c166": "" } as any)}>
-                          <a {...({ "_ngcontent-wbi-c166": "" } as any)}> Tennis <span className="counter items-center justify-center text-center [height:calc(18px_*_var(--factor))] [right:calc(10px_*_var(--factor))]!" {...({ "_ngcontent-wbi-c166": "" } as any)}>8</span></a>
-                        </div>
-                        <div {...({ "_ngcontent-wbi-c166": "" } as any)}>
-                          <a {...({ "_ngcontent-wbi-c166": "" } as any)}> Basketball <span className="counter items-center justify-center text-center [height:calc(18px_*_var(--factor))] [right:calc(10px_*_var(--factor))]!" {...({ "_ngcontent-wbi-c166": "" } as any)}>4</span></a>
-                        </div>
-                      </div>
-                    </ImportedNativeTag0>
-                    <div className="wmc [font-weight:700]" {...({ "_ngcontent-wbi-c166": "" } as any)}>
-                      <a {...({ "_ngcontent-wbi-c166": "" } as any)}><icon {...({ "_ngcontent-wbi-c166": "", href: "https://www.fortebet.ug/#icoCalendar", classname: "current h12", "_nghost-wbi-c39": "" } as any)}><svg className="current h12 align-middle" viewBox="0 0 100 100" {...({ "_ngcontent-wbi-c39": "" } as any)}><use xlinkHref="#icoCalendar" {...({ "_ngcontent-wbi-c39": "" } as any)} /></svg></icon> Schedule </a>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <LiveToolbar />
               <div className="match emptyLow [font-weight:700] [transition:background_0.2s]" {...({ "_ngcontent-wbi-c209": "" } as any)} />
             </div>
             )}
