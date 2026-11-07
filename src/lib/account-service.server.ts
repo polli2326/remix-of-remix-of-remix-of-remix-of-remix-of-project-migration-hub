@@ -68,10 +68,11 @@ async function requestFortebet(
   method: "GET" | "POST",
   body?: unknown,
   timeoutMs?: number,
+  withSession = true,
 ): Promise<{ response: Response; payload: ApiPayload | null }> {
   const headers = new Headers({ Accept: "application/json" });
   setResponseHeader('Cache-Control', 'no-store');
-  const cookie = getFortebetSessionCookieHeader();
+  const cookie = withSession ? getFortebetSessionCookieHeader() : undefined;
   if (cookie) headers.set("Cookie", cookie);
   if (body !== undefined) headers.set("Content-Type", "application/json");
 
@@ -486,7 +487,7 @@ export async function submitFortebetRegistration(
   try {
     const { response, payload } = await requestFortebet("/client/register/create", "POST", {
       data: registrationData,
-    });
+    }, 20000, false);
     const result = payload?.data as Record<string, unknown> | null | undefined;
     const checks = Array.isArray(result?.["checks"]) ? (result!["checks"] as Record<string, unknown>[]) : [];
     console.info("[register] fortebet reply", JSON.stringify({
