@@ -954,16 +954,16 @@ body:has(.virtual-viewer) .virtual-soccer-offer-header > div:first-child > span:
 }
 
 /* Signed-in balance/profile menu: match fortebet.ug spacing so rows aren't squashed. */
-#header .account-header-authenticated .user .secretMenu{display:flex;width:500px;height:auto;padding-top:18px;box-sizing:border-box;font-size:12px;line-height:normal;z-index:1000}
-#header .account-header-authenticated .user .secretMenu>div{display:block;height:auto;line-height:normal}
-#header .account-header-authenticated .user .secretMenu>div:first-child{flex:1 1 0%;padding:10px 16px 10px 24px}
-#header .account-header-authenticated .user .secretMenu>div:last-child{flex:0 0 auto;padding:10px 16px 10px 0}
-#header .account-header-authenticated .user .secretMenu h3{margin:0 0 18px;line-height:normal}
-#header .account-header-authenticated .user .secretMenu>div:last-child h3{margin-left:18px;padding-left:10px}
-#header .account-header-authenticated .user .secretMenu ul{display:block;margin:18px 0 12px;padding:0;height:auto}
-#header .account-header-authenticated .user .secretMenu>div:last-child ul{padding-left:10px;border-left:1px solid #696a75}
-#header .account-header-authenticated .user .secretMenu li{display:list-item;height:auto;line-height:normal;margin:0}
-#header .account-header-authenticated .user .secretMenu>div:first-child li{padding:4px 4px 4px 0}
-#header .account-header-authenticated .user .secretMenu li>span.flRight{float:right}
-#header .account-header-authenticated .user .secretMenu li a{display:block;padding:4px 10px;margin:0 7px;line-height:normal}
-#header .account-header-authenticated .user .secretMenu li.separator{height:1px;margin:12px 5px 12px 7px;padding:0;background:#696a75}
+html body .account-header-authenticated .user .secretMenu{display:flex;width:500px;height:auto;padding-top:18px;box-sizing:border-box;font-size:12px;line-height:normal;z-index:1000}
+html body .account-header-authenticated .user .secretMenu>div{display:block;height:auto;line-height:normal}
+html body .account-header-authenticated .user .secretMenu>div:first-child{flex:1 1 0%;padding:10px 16px 10px 24px}
+html body .account-header-authenticated .user .secretMenu>div:last-child{flex:0 0 auto;padding:10px 16px 10px 0}
+html body .account-header-authenticated .user .secretMenu h3{margin:0 0 18px;line-height:normal}
+html body .account-header-authenticated .user .secretMenu>div:last-child h3{margin-left:18px;padding-left:10px}
+html body .account-header-authenticated .user .secretMenu ul{display:block;margin:18px 0 12px;padding:0;height:auto}
+html body .account-header-authenticated .user .secretMenu>div:last-child ul{padding-left:10px;border-left:1px solid #696a75}
+html body .account-header-authenticated .user .secretMenu li{display:list-item;height:auto;line-height:normal;margin:0}
+html body .account-header-authenticated .user .secretMenu>div:first-child li{padding:4px 4px 4px 0}
+html body .account-header-authenticated .user .secretMenu li>span.flRight{float:right}
+html body .account-header-authenticated .user .secretMenu li a{display:block;padding:4px 10px;margin:0 7px;line-height:normal}
+html body .account-header-authenticated .user .secretMenu li.separator{height:1px;margin:12px 5px 12px 7px;padding:0;background:#696a75}
