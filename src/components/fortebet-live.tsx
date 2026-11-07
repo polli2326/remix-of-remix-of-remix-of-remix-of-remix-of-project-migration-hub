@@ -3,6 +3,8 @@ import { queryOptions, useQuery } from "@tanstack/react-query";
 import { getPrematchOffer, getLiveOffer, getBanners, getEventDetail, getMarketOffer, type Cell, type Offer, type OfferEvent, type QuickFilter } from "@/lib/fortebet.functions";
 import { seedOdds, useLiveOdd, useLiveEvent, useFeedVersion, getOdd, isMarketLocked, useOddsFeed } from "@/lib/odds-feed";
 import { applyFilters, favOdds } from "@/lib/offer-filters";
+import { activeLiveSport, filterLiveEvents, liveMarketHeadings, liveSportTabs } from "@/lib/live-nav";
+import { liveActions, useLiveState } from "@/components/live-toolbar";
 import { possibleWin, stakeError, totalOdds, vipPoints, TICKET_RULES } from "@/lib/ticket";
 import { useSels, type Sel, type Slip } from "@/lib/tickets-store";
 import { useOfferFilters } from "@/components/offer-context";
@@ -34,12 +36,15 @@ export function LiveOddsFeed() {
   return null;
 }
 
+const TZ = "Africa/Kampala";
+const dayKey = (d: Date) => d.toLocaleDateString("en-CA", { timeZone: TZ });
+/** Match day/time in Uganda time, so the server-rendered page and the browser show the same text. */
 export function fmtTime(ts: string) {
   const d = new Date(ts);
   const now = new Date();
   const tom = new Date(now.getTime() + 864e5);
-  const time = d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
-  const day = d.toDateString() === now.toDateString() ? "Today" : d.toDateString() === tom.toDateString() ? "Tomorrow" : d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  const time = d.toLocaleTimeString("en-US", { timeZone: TZ, hour: "2-digit", minute: "2-digit" });
+  const day = dayKey(d) === dayKey(now) ? "Today" : dayKey(d) === dayKey(tom) ? "Tomorrow" : d.toLocaleDateString("en-US", { timeZone: TZ, month: "short", day: "numeric" });
   return { day, time };
 }
 
@@ -652,7 +657,7 @@ export function StatsModal({ id, onClose }: { id: string; live?: boolean; onClos
 }
 
 // ---------- Live page ----------
-function LiveRow({ e, o, slip, open, onOpen, onStats }: { e: OfferEvent; o: Offer; slip: Slip; open: boolean; onOpen: () => void; onStats: () => void }) {
+function LiveRow({ e, o, slip, open, fav, onOpen, onStats }: { e: OfferEvent; o: Offer; slip: Slip; open: boolean; fav: boolean; onOpen: () => void; onStats: () => void }) {
   const ev = useLiveEvent(e.id, { sc: e.sc, st: e.st }, o.at);
   const sp = o.sports.find((s) => s.id === e.sp);
   const L = layout(e.c, sp?.cols ?? ["1", "X", "2"]);
@@ -664,10 +669,17 @@ function LiveRow({ e, o, slip, open, onOpen, onStats }: { e: OfferEvent; o: Offe
       <div className="data match [font-weight:700]">
         <div className="matchInfo curPointer" onClick={onOpen}>
           <div className="app-widget-event-set">
-            <div className="starFavorite"><span className="ico chart h13 opa06 curPointer" role="button" aria-label="Match statistics" style={{ display: "inline-block", minWidth: 14, minHeight: 13 }} onClick={(x) => { x.preventDefault(); x.stopPropagation(); onStats(); }} /></div>
+            <div className="starFavorite">
+              <span role="button" aria-label={fav ? "Remove from My selection" : "Add to My selection"} aria-pressed={fav} className="curPointer"
+                onClick={(x) => { x.preventDefault(); x.stopPropagation(); liveActions.toggleFav(e.id); }}
+                style={{ display: "inline-flex", fontSize: 16, lineHeight: 1, color: fav ? "#cea642" : "#a3a4a8" }}>{fav ? "★" : "☆"}</span>
+            </div>
             <div className="teamsName"><span> {e.h} </span><span> {e.a} </span></div>
-            <div className="teamsScore"><div>{ev.sc ?? "0 : 0"}</div><div /></div>
-            <div className="status"><i>{ev.st ?? "Live"}</i></div>
+            <div className="teamsScore"><div>{ev.sc ? ev.sc.replace(":", " : ") : "0 : 0"}</div><div /></div>
+            <div className="status">
+              <i>{ev.st ?? "Live"}</i>
+              <span className="ico chart h13 opa06 curPointer" role="button" aria-label="Match statistics" style={{ display: "inline-block", minWidth: 14, minHeight: 13, marginLeft: 6 }} onClick={(x) => { x.preventDefault(); x.stopPropagation(); onStats(); }} />
+            </div>
           </div>
         </div>
         <div className="app-widget-market-set">
@@ -681,7 +693,7 @@ function LiveRow({ e, o, slip, open, onOpen, onStats }: { e: OfferEvent; o: Offe
             </div>
           ))}
         </div>
-        <div className="curPointer" onClick={onOpen}> +{Math.max(0, e.mc - 1)} </div>
+        <div className="curPointer" onClick={onOpen}>{e.mc > 1 ? ` +${e.mc - 1} ` : ""}</div>
       </div>
       {open && <MarketsDropdown id={e.id} live sels={slip.sels} toggle={slip.toggle} />}
     </div>
@@ -690,51 +702,61 @@ function LiveRow({ e, o, slip, open, onOpen, onStats }: { e: OfferEvent; o: Offe
 
 export function LivePreviewList({ slip }: { slip: Slip }) {
   const q = useOffer(true);
+  const ls = useLiveState();
   const [open, setOpen] = useState<string | null>(null);
   const [statsId, setStatsId] = useState<string | null>(null);
+  const [closed, setClosed] = useState<string[]>([]);
   const o = q.data;
+  const tabs = useMemo(() => (o ? liveSportTabs(o) : []), [o]);
+  const sportId = activeLiveSport(tabs, ls.sport);
   const groups = useMemo(() => {
     if (!o) return [];
+    const evs = filterLiveEvents(o.events, { view: ls.view, sport: sportId, q: ls.q, favs: ls.favs });
     const tours = new Map(o.tournaments.map((t) => [t.id, t]));
     const cats = new Map(o.categories.map((c) => [c.id, c]));
-    const out: { key: string; name: string; sp: string; evs: OfferEvent[] }[] = [];
-    const sorted = [...o.events].sort((a, b) => (o.sports.findIndex((s) => s.id === a.sp) - o.sports.findIndex((s) => s.id === b.sp)) || a.s.localeCompare(b.s));
+    const out: { key: string; name: string; sp: string; flag: string; evs: OfferEvent[] }[] = [];
+    const sorted = [...evs].sort((a, b) => (o.sports.findIndex((s) => s.id === a.sp) - o.sports.findIndex((s) => s.id === b.sp)) || a.s.localeCompare(b.s));
     for (const e of sorted) {
       const t = tours.get(e.t);
       const c = t ? cats.get(t.categoryId) : undefined;
       const g = out.find((x) => x.key === e.t);
       if (g) g.evs.push(e);
-      else out.push({ key: e.t, name: [c?.name, t?.name].filter(Boolean).join(" - "), sp: e.sp, evs: [e] });
+      else out.push({ key: e.t, name: [c?.name, t?.name].filter(Boolean).join("/"), sp: e.sp, flag: c?.icon ?? "", evs: [e] });
     }
     return out;
-  }, [o]);
+  }, [o, ls.view, ls.q, ls.favs, sportId]);
+  const headSport = ls.view === "selection" ? undefined : o?.sports.find((s) => s.id === sportId);
+  const [m1, m2] = ls.view === "selection" ? ["", ""] : liveMarketHeadings(headSport);
+  const empty = ls.view === "selection" ? "No matches in My selection. Tap the star next to a match to add it." : ls.q.trim().length >= 2 ? "No live match matches your search." : "No live matches right now.";
   return (
     <div className="live">
       <div className="live__head live__head--space" />
       <div data-ce="live-preview">
         <div className="match headOdds uppercase [font-weight:700]">
-          <div><span className="ico soccer" /></div>
-          <div>Live matches</div>
-          <div className="matchOdds"> Full Time Result </div>
-          <div className="matchOdds"> Double Chance </div>
+          <div><span className={`ico ${headSport?.icon ?? "soccer"}`} /></div>
+          <div>{ls.view === "selection" ? "My selection" : headSport?.name ?? "Live matches"}</div>
+          <div className="matchOdds"> {m1} </div>
+          <div className="matchOdds"> {m2} </div>
           <div />
         </div>
-        {q.isLoading && <div className="match tournament"><div /><div>Loading live matches…</div></div>}
-        {q.isError && <div className="match tournament"><div /><div>Could not load live matches. Retrying…</div></div>}
-        {o && groups.length === 0 && <div className="match tournament"><div /><div>No live matches right now.</div></div>}
+        {!o && q.isError && <div className="match tournament"><div /><div>Could not load live matches. Retrying…</div></div>}
+        {o && groups.length === 0 && <div className="match tournament"><div /><div>{empty}</div></div>}
         {o && groups.map((g) => {
           const sp = o.sports.find((s) => s.id === g.sp);
           const cols = layout([], sp?.cols ?? ["1", "X", "2"]).cols;
+          const isClosed = closed.includes(g.key);
           return (
             <div key={g.key} style={{ display: "contents" }}>
               <div className="match tournament [font-weight:700]">
-                <div><span className={`ico ${sp?.icon ?? "soccer"}`} /></div>
+                <div>{g.flag ? <span className={`ico flag ${g.flag}`} /> : <span className={`ico ${sp?.icon ?? "soccer"}`} />}</div>
                 <div><span>{g.name}</span><span> ({g.evs.length})</span></div>
                 <div className="matchOdds">{cols.slice(0, 3).map((c, i) => <div key={i}>{c} </div>)}</div>
                 <div className="matchOdds">{cols.slice(3, 6).map((c, i) => <div key={i}>{c} </div>)}</div>
-                <div />
+                <div className="curPointer" role="button" aria-label={isClosed ? "Show matches" : "Hide matches"} aria-expanded={!isClosed}
+                  onClick={() => setClosed((x) => (isClosed ? x.filter((k) => k !== g.key) : [...x, g.key]))}
+                  style={{ display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 }}>{isClosed ? "⌄" : "⌃"}</div>
               </div>
-              {g.evs.map((e) => <LiveRow key={e.id} e={e} o={o} slip={slip} open={open === e.id} onOpen={() => setOpen((x) => (x === e.id ? null : e.id))} onStats={() => setStatsId(e.id)} />)}
+              {!isClosed && g.evs.map((e) => <LiveRow key={e.id} e={e} o={o} slip={slip} fav={ls.favs.includes(e.id)} open={open === e.id} onOpen={() => setOpen((x) => (x === e.id ? null : e.id))} onStats={() => setStatsId(e.id)} />)}
             </div>
           );
         })}
