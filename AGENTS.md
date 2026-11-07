@@ -37,4 +37,5 @@ use the editor.
 - Same-site <a href> clicks are turned into router navigation by one listener in src/routes/__root.tsx, so the imported pages' plain links never reload the app.
 - Casino lobby and jackpot-counter rules live in src/lib/casino.ts (tested in src/test/casino-rules.test.ts); games launch through the playCasinoGame server function, with real mode using the Fortebet session established by account login.
 - Account windows share one root-mounted dialog. Login and registration use server-only Fortebet API calls; the session stays in an HttpOnly app cookie and is forwarded only by server-side API requests.
+- Signed-in account pages share the imported LiveShell and an account navigation under /client/account/*; use existing server account actions so profile data remains per-user and payment behavior stays unchanged.
 - Virtual Soccer keeps the imported route layout, reads its public offer through a cached server function, and scales one persistent Stream/Tracker iframe when expanded; local preview picks never submit wagers.

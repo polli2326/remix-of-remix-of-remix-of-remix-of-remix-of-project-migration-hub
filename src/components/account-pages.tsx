@@ -27,7 +27,7 @@ export function AccountPages({ path = 'profile' }: { path?: string }) {
   const profile = obj(data?.profile.ok ? data.profile.data : null);
   const contact = obj(profile.contact);
   const address = obj(profile.address);
-  return <LiveShell layout="full" active={undefined}><div className="fb-account">
+  return <LiveShell layout="full" active="account"><div className="fb-account">
     <nav className="fb-account-nav" aria-label="Account navigation">{accountLinks.map(([label,target,kind]) => {
       const Icon = kind === 'wallet' ? Wallet : kind === 'ticket' ? Ticket : kind === 'profile' ? UserRound : kind === 'messages' ? Mail : Banknote;
       const active = target === path || target === 'deposit' && /^(deposits|withdrawals)\//.test(path) || target === 'bets/all' && path === 'bets';

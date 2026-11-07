@@ -8,7 +8,7 @@ import capturedCSS from "../styles/pages/live.preview.css?raw";
 
 const ImportedNativeTag0 = "innerscroll" as import("react").ElementType;
 
-type NavKey = "sportsbook" | "live" | "slots";
+type NavKey = "sportsbook" | "live" | "slots" | "account";
 
 export function LiveShell({ children, slip, active = "live", layout = "ticket" }: { children: ReactNode; slip?: ReactNode; active?: NavKey; layout?: "ticket" | "full" }) {
   const navCls = (k: NavKey) => (k === active ? "active" : "");
@@ -448,9 +448,9 @@ export function LiveShell({ children, slip, active = "live", layout = "ticket" }
                     </div>
                   </div>
                   <div className="buttons" {...({ "_ngcontent-wbi-c207": "" } as any)}>
-                    <a href="/client/deposits/branch" {...({ "_ngcontent-wbi-c207": "" } as any)}><span className="ico h13 branch" {...({ "_ngcontent-wbi-c207": "" } as any)} /> deposit at branch</a>
-                    <a href="/client/deposits/mtn" {...({ "_ngcontent-wbi-c207": "" } as any)}><span className="ico mtn" {...({ "_ngcontent-wbi-c207": "" } as any)} /> MTN mobile money</a>
-                    <a href="/client/deposits/airtel" {...({ "_ngcontent-wbi-c207": "" } as any)}><span className="ico airtel" {...({ "_ngcontent-wbi-c207": "" } as any)} /> Airtel money</a>
+                    <a href="/client/account/deposits/branch" {...({ "_ngcontent-wbi-c207": "" } as any)}><span className="ico h13 branch" {...({ "_ngcontent-wbi-c207": "" } as any)} /> deposit at branch</a>
+                    <a href="/client/account/deposits/mtn" {...({ "_ngcontent-wbi-c207": "" } as any)}><span className="ico mtn" {...({ "_ngcontent-wbi-c207": "" } as any)} /> MTN mobile money</a>
+                    <a href="/client/account/deposits/airtel" {...({ "_ngcontent-wbi-c207": "" } as any)}><span className="ico airtel" {...({ "_ngcontent-wbi-c207": "" } as any)} /> Airtel money</a>
                   </div>
                   <div {...({ "_ngcontent-wbi-c207": "" } as any)}>Betting is addictive and can be psychologically harmful.</div>
                 </div>
