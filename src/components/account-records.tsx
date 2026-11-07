@@ -39,7 +39,7 @@ export function AccountRecords({path}: {path: string}) {
     return () => {active = false;};
   }, [path,filters,from,to,page,version,loadRecords]);
   const allRows = recordRows(record);
-  const rows = allRows.slice(0,30);
+  const rows = allRows.slice(0,30).filter(row=>!messages || !Array.isArray(row['behavior']) || row['behavior'].includes('MESSAGE'));
   const options = messages ? [] : tickets ? ['All','Win','Cashout','Placed','Lost','Void','Canceled'] : points ? ['All','VIP PTS winnings','VIP PTS losses','Transfers'] : ['All','Deposits','Withdrawals','Money winnings','Money losses'];
   async function openMessage(id: number) {
     if (expanded === id) {setExpanded(null); return;}

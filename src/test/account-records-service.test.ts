@@ -76,7 +76,7 @@ it("loads only the signed-in account's own profile and activity records", async 
     expect(options.method).toBe("POST");
     expect((options.headers as Headers).get("Cookie")).toBe("forte_session=test-session");
     const body = JSON.parse(options.body as string);
-    if(url.endsWith('/transactions/get')) expect(body).toEqual({limit:31,offset:0,dateFrom:null,dateTo:null,wallet:1});
+    if(url.endsWith('/transactions/get')) expect(body).toEqual({limit:31,offset:0,dateFrom:null,dateTo:null,wallet:1,type:'all'});
     else if(url.endsWith('/tickets/get')) expect(body).toEqual({limit:31,offset:0,dateFrom:null,dateTo:null,state:[],betType:['ALL']});
     else if(url.endsWith('/messages/get')) expect(body).toEqual({limit:31,offset:0,lang:'EN'});
     else expect(body).toEqual({});
