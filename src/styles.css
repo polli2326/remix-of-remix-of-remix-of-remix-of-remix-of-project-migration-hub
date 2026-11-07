@@ -915,3 +915,13 @@ body:has(.virtual-viewer) .virtual-soccer-offer-header > div:first-child > span:
  .fb-ticket-list {overflow:auto;}.fb-account .fb-ticket-row {min-width:650px;}
  .fb-message-title span {flex-shrink:1;}
 }
+.fb-account .fb-account-nav .fb-account-nav-link {box-shadow:none;}
+.fb-account .fb-profile-input button {border:0;box-shadow:none;border-radius:0;}
+.fb-account .fb-provider {background:var(--profile-row);}
+.fb-account .fb-messages section {margin:0;}
+.fb-account .fb-message-title {display:grid;grid-template-columns:150px minmax(0,1fr);border:0;border-radius:0;box-shadow:none;min-height:30px;padding:6px 15px;font-size:12px;background:var(--profile-row);}
+.fb-account .fb-messages section:nth-child(even) .fb-message-title {background:var(--profile-line);}
+.fb-account .fb-message-title span {margin:0;text-align:center;}
+.fb-account .fb-message-title strong {text-align:center;}
+.fb-message-header {display:grid;grid-template-columns:150px 1fr;background:var(--profile-row);padding:15px;text-align:center;font-weight:700;color:var(--profile-muted);}
+@media(max-width:800px){.fb-account .fb-message-title,.fb-message-header{grid-template-columns:100px minmax(0,1fr);}.fb-account .fb-message-title{font-size:11px;}}

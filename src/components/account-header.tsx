@@ -195,7 +195,7 @@ export function AccountHeader() {
         </a>
       </div>
 
-
+      {logoutError && <span role="alert">{logoutError}</span>}
     </div>
   );
 }
