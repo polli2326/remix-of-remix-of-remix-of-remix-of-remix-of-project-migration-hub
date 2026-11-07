@@ -13,3 +13,5 @@
 - [x] Deposit: option to deposit from another number
 
 - [ ] Balance menu VIP points + VIP member club link (like fortebet.ug)
+- [ ] Registration failing with correct details
+- [ ] Register window fits without scrolling (like fortebet.ug)
