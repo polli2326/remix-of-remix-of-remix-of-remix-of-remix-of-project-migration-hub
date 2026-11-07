@@ -513,3 +513,30 @@ export const playCasinoGame = createServerFn({ method: "POST" })
       return { ok: false, error: "UNAVAILABLE" };
     }
   });
+
+// ---------- Live schedule (/live/calendar) ----------
+export type CalendarRow = { id: string; start: string; sport: string; icon: string; home: string; away: string; league: string };
+
+/** Fortebet's live schedule for one Uganda calendar day (YYYY-MM-DD), same feed as fortebet.ug's Schedule tab. */
+export const getLiveCalendar = createServerFn({ method: "GET" })
+  .inputValidator((d: { day: string }) => {
+    if (typeof d?.day !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(d.day)) throw new Error("Invalid day");
+    return { day: d.day };
+  })
+  .handler(async ({ data }): Promise<{ rows: CalendarRow[] }> => {
+    const r = await getJson("/offer/live_calendar?lang=en", 60_000);
+    const list: Raw[] = Array.isArray(r.data?.data) ? r.data.data : [];
+    const rows = list
+      .filter((x) => typeof x?.startTs === "string" && new Date(x.startTs).toLocaleDateString("en-CA", { timeZone: "Africa/Kampala" }) === data.day)
+      .sort((a, b) => a.startTs.localeCompare(b.startTs) || (a.sportOrder ?? 0) - (b.sportOrder ?? 0))
+      .map((x) => ({
+        id: String(x.eventId),
+        start: String(x.startTs),
+        sport: String(x.sport ?? ""),
+        icon: String(x.sportIcon ?? ""),
+        home: String(x.home ?? ""),
+        away: String(x.away ?? ""),
+        league: [x.category, x.tournament].filter(Boolean).join(" - "),
+      }));
+    return { rows };
+  });
