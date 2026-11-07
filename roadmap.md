@@ -7,4 +7,6 @@
 - [x] Connect profile saving and branch withdrawal to verified Fortebet actions; test safeguards without changing the live account.
 - [x] Verify real transaction requests and message content; Fortebet returns empty transaction history for this account.
 - [ ] Verify successful live profile/password changes and payments: requires the account owner to submit real changes or payments.
-- [ ] Verify live ticket detail: Fortebet returns an error for this account's virtual soccer ticket.
+- [ ] Verify live ticket detail: Fortebet returns an error for this account's virtual soccer ticket.- [ ] Header balance/profile dropdown not clipped
+- [ ] Home: SHOW MORE + HIGHLIGHTED ODDS ON THE TICKET buttons under matches (like fortebet.ug)
+- [ ] Deposit: option to deposit from another number
