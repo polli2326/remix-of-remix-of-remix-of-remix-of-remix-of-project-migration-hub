@@ -32,7 +32,7 @@ use the editor.
 - Live betting data comes from the public Fortebet feeds, fetched through server functions in src/lib/fortebet.functions.ts (with a short cache) because the browser cannot call those feeds directly.
 - Real-time odds/score changes come from the public Fortebet Socket.IO feed opened in the browser (src/lib/odds-feed.ts); snapshot data seeds the same store, and the newest timestamp wins, so every odds button and the bet slip read one source.
 - Offer filtering and ticket maths live as pure functions (src/lib/offer-filters.ts, src/lib/ticket.ts) with tests in src/test/offer-rules.test.ts, so rules stay checkable without the UI.
-- Bet slips are stored in the browser (src/lib/tickets-store.ts); real bet placement needs an authorized Fortebet account and is not wired.
+- Bet slips are stored in the browser (src/lib/tickets-store.ts); Place Bet opens an exact real-money confirmation, then submits once through the verified Fortebet session (src/lib/bet-placement.*), polls pending ticket references without resubmitting, and clears the slip only after Fortebet explicitly accepts it.
 - Ticket check and ticket preview share one ticket window (src/components/ticket-check.tsx); ticket lookups go through the checkTicket server function, so both views stay identical.
 - Same-site <a href> clicks are turned into router navigation by one listener in src/routes/__root.tsx, so the imported pages' plain links never reload the app.
 - Casino lobby and jackpot-counter rules live in src/lib/casino.ts (tested in src/test/casino-rules.test.ts); games launch through the playCasinoGame server function, with real mode using the Fortebet session established by account login.

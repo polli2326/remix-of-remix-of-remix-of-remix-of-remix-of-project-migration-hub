@@ -125,25 +125,25 @@ export function parseBetPlacementResult(payload: unknown, httpOk: boolean): BetP
   }
 
   const data = root["data"] && typeof root["data"] === "object" ? (root["data"] as Record<string, unknown>) : {};
-  const result = text(data.result);
+  const result = text(data["result"]);
   if (result === "SB_AUTH_ACCEPTED") {
-    const ticket = data.ticket && typeof data.ticket === "object" ? (data.ticket as Record<string, unknown>) : {};
-    const number = text(ticket.number) || text(data.idTicket);
+    const ticket = data["ticket"] && typeof data["ticket"] === "object" ? (data["ticket"] as Record<string, unknown>) : {};
+    const number = text(ticket["number"]) || text(data["idTicket"]);
     return {
       status: "accepted",
       message: number ? `Fortebet accepted your bet. Ticket ${number}.` : "Fortebet accepted your bet.",
-      ticket: { number, shortNumber: text(ticket.shortNumber) },
+      ticket: { number, shortNumber: text(ticket["shortNumber"]) },
     };
   }
   if (result === "SB_AUTH_PENDING") {
-    const idTicket = text(data.idTicket);
+    const idTicket = text(data["idTicket"]);
     if (!idTicket) {
       return { status: "unknown", message: "Fortebet is processing the bet but returned no ticket reference. Check My Tickets before trying again." };
     }
     return { status: "pending", idTicket, message: "Fortebet is authorising this bet. Do not submit it again." };
   }
 
-  const checks = Array.isArray(data.check) ? data.check : [];
+  const checks = Array.isArray(data["check"]) ? data["check"] : [];
   const codes = checks.flatMap((check) => {
     if (!check || typeof check !== "object") return [];
     const code = text((check as Record<string, unknown>).code);
