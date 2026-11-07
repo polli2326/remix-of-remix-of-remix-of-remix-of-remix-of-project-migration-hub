@@ -1,4 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
+import { groupDetailMarkets } from "@/lib/live-markets";
+import type { RawScoreboard } from "@/lib/live-scoreboard";
 
 const BASE = "https://www.fortebet.ug/api/web/v1";
 export const BANNER_BASE = "https://www.fortebet.ug/static/temp/cms/";
@@ -37,6 +39,7 @@ export type OfferEvent = {
   c: Cell[];
   sc?: string | undefined; // live score
   st?: string | undefined; // live status
+  sb?: RawScoreboard; // live scoreboard (Fortebet status object)
 };
 export type QuickFilter = { key: string; marketId: number; spec: string; label: string; cols: string[]; outcomes: number[] };
 export type Offer = {
@@ -150,6 +153,7 @@ function normalise(d: Raw, at: number, live: boolean): Offer {
       c: cells,
       sc: score,
       st: status,
+      ...(live && e.scoreboard?.status ? { sb: e.scoreboard.status as RawScoreboard } : {}),
     });
   }
   events.sort((a, b) => a.s.localeCompare(b.s));
@@ -233,6 +237,8 @@ export const getMarketOffer = createServerFn({ method: "GET" })
   });
 
 export type MarketDTO = { id: number; name: string; outcomes: { id: number; name: string; odds: number | null; locked: boolean }[] };
+/** One info tab Fortebet lists for a live event (TRACKER, TIMELINE, STATS, ...), Sportradar widget settings included. */
+export type LiveWidget = { name: string; type: string; objectType: string | null; url: string | null; params: Record<string, unknown> };
 
 export const getEventDetail = createServerFn({ method: "GET" })
   .inputValidator((input: { id: string; live?: boolean }) => {
@@ -267,17 +273,35 @@ export const getEventDetail = createServerFn({ method: "GET" })
     });
     markets.sort((a, b) => a.order - b.order || a.name.localeCompare(b.name));
     const { score, status } = scoreOf(e);
+    const sportId = String(c?.sportId ?? "");
+    const widgets: LiveWidget[] = ((e.widgets ?? []) as Raw[])
+      .filter((w) => w && w.active !== false && typeof w.name === "string")
+      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+      .map((w) => ({
+        name: String(w.name),
+        type: String(w.type ?? ""),
+        objectType: w.objectType ? String(w.objectType) : null,
+        url: typeof w.url === "string" && /^https:\/\//.test(w.url) ? w.url : null,
+        params: w.params && typeof w.params === "object" ? w.params : {},
+      }));
     return {
       at: Math.min(detail.at, full.at),
       id: data.id,
       home,
       away,
-      sportId: String(c?.sportId ?? ""),
+      sportId,
+      sportIcon: String(f.sport?.[sportId]?.icon ?? "soccer"),
       league: [c?.name, t?.name].filter(Boolean).join(" / "),
       startTs: e.startTs as string,
       score: data.live ? score : undefined,
       status: data.live ? status : undefined,
       markets: markets.map(({ id, name, outcomes }) => ({ id, name, outcomes })),
+      /** Fortebet detail blocks (grouped lines, grid template, suspended slots). */
+      groups: groupDetailMarkets(e.markets ?? {}, f.market_list?.[sportId] ?? {}, home, away),
+      /** Raw live scoreboard (status object) for the SCORE tab. */
+      sb: data.live ? ((e.scoreboard?.status ?? null) as RawScoreboard | null) : null,
+      widgets: data.live ? widgets : [],
+      livestream: data.live && typeof e.livestream === "string" && /^https:\/\//.test(e.livestream) ? (e.livestream as string) : null,
     };
   });
 

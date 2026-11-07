@@ -1,9 +1,10 @@
 // Browser-side real-time odds store fed by the public Fortebet live odds socket
 // (Socket.IO v4, namespace /liveodds, room OFFER). Payloads are "ZB64 <base64 deflate JSON>".
 import { useEffect, useState, useSyncExternalStore } from "react";
+import { mergeScoreboard, type RawScoreboard } from "@/lib/live-scoreboard";
 
 type OddsState = { v: number; l: boolean; at: number; prev?: number | undefined; changedAt?: number | undefined };
-type EventState = { sc?: string | undefined; st?: string | undefined; at: number; gone?: boolean };
+type EventState = { sc?: string | undefined; st?: string | undefined; at: number; gone?: boolean; sb?: RawScoreboard | undefined };
 
 const odds = new Map<number, OddsState>();
 const lockedMarkets = new Map<number, { l: boolean; at: number }>();
@@ -67,7 +68,13 @@ export function applyDelta(frame: any, at = Date.now()) {
     for (const [id, e] of Object.entries<any>(m.update?.event ?? {})) {
       const cur = events.get(id) ?? { at };
       const next: EventState = { ...cur, at };
-      if (e.scoreboard) Object.assign(next, scoreOf(e.scoreboard));
+      if (e.scoreboard?.status) {
+        // Deltas can carry only the changed fields: keep the merged scoreboard and derive score/status from it.
+        next.sb = mergeScoreboard(cur.sb, e.scoreboard.status);
+        const s = scoreOf({ status: next.sb });
+        if (s.sc) next.sc = s.sc;
+        if (s.st) next.st = s.st;
+      }
       if (e.eventStatusId != null && e.eventStatusId !== 1) next.gone = true;
       events.set(id, next);
     }
@@ -101,7 +108,17 @@ export function useLiveOdd(id: number | undefined, base: number | undefined, bas
     const t = setTimeout(() => tick((x) => x + 1), 6100 - (Date.now() - (recent?.changedAt ?? 0)));
     return () => clearTimeout(t);
   }, [dir, recent?.changedAt]);
-  return { v, locked, dir: dir as "up" | "down" | undefined };
+  // Last move direction, kept until the next change (fortebet.ug's green/red corner marks).
+  const trend = fresh && s.prev != null ? (s.v > s.prev ? "up" : s.v < s.prev ? "down" : undefined) : undefined;
+  return { v, locked, dir: dir as "up" | "down" | undefined, trend: trend as "up" | "down" | undefined };
+}
+
+/** Full live scoreboard for one event: snapshot merged with newer socket deltas. */
+export function useLiveScoreboard(id: string, base: RawScoreboard | null | undefined, baseAt: number): RawScoreboard | undefined {
+  useSyncExternalStore(subscribe, () => version, () => 0);
+  const e = events.get(id);
+  if (!e?.sb || e.at < baseAt) return base ?? undefined;
+  return mergeScoreboard(base ?? undefined, e.sb);
 }
 
 export function useLiveEvent(id: string, base: { sc?: string | undefined; st?: string | undefined }, baseAt: number) {
