@@ -1,15 +1,10 @@
 import { useEffect, useState, type FormEvent } from "react";
 import {
   ArrowLeft,
-  Activity,
-  ChevronDown,
   CircleUserRound,
-  LayoutDashboard,
-  LogOut,
   Minus,
   Plus,
   RefreshCw,
-  Wallet,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,13 +14,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   getFortebetAccount,
   getPendingMobileMoney,
@@ -61,6 +49,16 @@ function initialsFor(name: string) {
       .slice(0, 2)
       .map((part) => part[0]?.toUpperCase())
       .join("") || "U"
+  );
+}
+
+function SiteIcon({ href, className }: { href: string; className: string }) {
+  return (
+    <icon {...({ href, classname: className } as Record<string, string>)}>
+      <svg className={className} viewBox="0 0 100 100" aria-hidden="true">
+        <use xlinkHref={href} />
+      </svg>
+    </icon>
   );
 }
 
@@ -126,6 +124,11 @@ export function AccountHeader() {
     setPaymentInstructions("");
     setPaymentError("");
   }, [walletPanel]);
+
+  async function refreshBalance() {
+    const result = await getFortebetAccount().catch(() => null);
+    if (result?.ok) setAccountSession(result.account);
+  }
 
   async function handleLogout() {
     setLogoutPending(true);
@@ -219,90 +222,109 @@ export function AccountHeader() {
 
   return (
     <div className="account-header-entry account-header-authenticated">
-      <div className="account-wallet-controls">
-        <button
-          type="button"
-          className="account-balance-action"
-          aria-label="Deposit"
-          title="Deposit"
-          onClick={() => setWalletPanel("deposit")}
+      <div className="buttons hover">
+        <a
+          href="/client/account/deposit"
+          onClick={(event) => {
+            event.preventDefault();
+            setWalletPanel("dashboard");
+          }}
         >
-          <Plus aria-hidden="true" />
-        </button>
-        <div
-          className="account-balance-pill"
-          aria-label={`Balance ${balance} ${account.currency}`}
-          title={`Balance in ${account.currency}`}
-        >
-          <span className="account-balance-coin" aria-hidden="true">
-            ●
-          </span>
-          <span>{balance}</span>
-        </div>
-        <button
-          type="button"
-          className="account-balance-action"
-          aria-label="Withdraw"
-          title="Withdraw"
-          onClick={() => setWalletPanel("withdraw")}
-        >
-          <Minus aria-hidden="true" />
-        </button>
-        <button
-          type="button"
-          className="account-wallet-button"
-          onClick={() => setWalletPanel("dashboard")}
-        >
-          <Wallet aria-hidden="true" />
-          <span>Wallet</span>
-        </button>
+          DEPOSITS &amp; WITHDRAWALS
+        </a>
       </div>
-
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button
-            type="button"
-            className="account-profile-trigger"
-            aria-label={`Account menu for ${displayName}`}
-          >
-            <span className="account-profile-avatar" aria-hidden="true">
-              {initialsFor(displayName)}
-            </span>
-            <span className="account-profile-name">{displayName}</span>
-            <ChevronDown className="account-profile-chevron" aria-hidden="true" />
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="account-profile-menu">
-          <div className="account-profile-menu-heading">
-            <strong>{displayName}</strong>
-            <span>@{account.nickname}</span>
+      <div className="user">
+        <a href="/admin" aria-label="My tickets">
+          <SiteIcon href="#icoClientTicket" className="current h30" />
+          <span> My tickets </span>
+        </a>
+        <div>
+          <input id="showBalance" type="checkbox" />
+          <span className="separator" />
+          <div className="balanceVisible">
+            <svg
+              viewBox="0 0 16 16"
+              className="curPointer reload"
+              style={{ verticalAlign: "text-top" }}
+              role="button"
+              aria-label="Refresh balance"
+              onClick={() => void refreshBalance()}
+            >
+              <path
+                fill="currentColor"
+                d="M13.65 2.35A7.958 7.958 0 0 0 8 0C3.58 0 .01 3.58.01 8S3.58 16 8 16c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 8 14c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L9 7h7V0l-2.35 2.35z"
+              />
+            </svg>
+            <a> {balance} {account.currency}</a> &nbsp;
+            <label htmlFor="showBalance" aria-label="Hide balance">
+              <SiteIcon href="#icoEyeOff" className="curPointer current h22" />
+            </label>
           </div>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onSelect={() => setWalletPanel("dashboard")}>
-            <LayoutDashboard aria-hidden="true" />
-            Dashboard
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <a href="/admin">
-              <Activity aria-hidden="true" />
-              Account activity
-            </a>
-          </DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => setWalletPanel("deposit")}>
-            <Plus aria-hidden="true" />
-            Deposit
-          </DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => setWalletPanel("withdraw")}>
-            <Minus aria-hidden="true" />
-            Withdraw
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem disabled={logoutPending} onSelect={() => void handleLogout()}>
-            <LogOut aria-hidden="true" />
-            {logoutPending ? "Signing out…" : "Sign out"}
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+          <div className="balanceHidden">
+            <label htmlFor="showBalance">
+              Show balance &nbsp;
+              <SiteIcon href="#icoEye" className="curPointer current h22" />
+            </label>
+          </div>
+          <span className="separator" />
+          <SiteIcon href="#icoClientPersona" className="current h13" /> {account.nickname}
+          <div className="secretMenu">
+            <div>
+              <h3>Your current balance</h3>
+              <ul>
+                <li>
+                  <span className="flRight textWhite">
+                    {" "}
+                    {balance} {account.currency}{" "}
+                  </span>{" "}
+                  Account balance:
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h3>Account</h3>
+              <ul>
+                <li>
+                  <a role="menuitem" onClick={() => setWalletPanel("deposit")}>
+                    Deposit
+                  </a>
+                </li>
+                <li>
+                  <a role="menuitem" onClick={() => setWalletPanel("withdraw")}>
+                    Withdraw
+                  </a>
+                </li>
+                <li>
+                  <a href="/admin">My Transactions</a>
+                </li>
+                <li>
+                  <a href="/admin">My Tickets</a>
+                </li>
+                <li>
+                  <a role="menuitem" onClick={() => setWalletPanel("dashboard")}>
+                    My Profile
+                  </a>
+                </li>
+                <li className="separator" />
+                <li>
+                  <a role="menuitem" onClick={() => void handleLogout()}>
+                    {logoutPending ? "Signing out…" : "Logout"}
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <a href="/admin" className="header__messages" aria-label="My messages">
+        <SiteIcon href="#icoMessages" className="current h30" />
+        <span> My messages </span>
+      </a>
+      <div className="buttons logout">
+        <a role="button" aria-label="Logout" onClick={() => void handleLogout()}>
+          <span className="ico login h15" />
+        </a>
+      </div>
 
       <Dialog open={walletPanel !== null} onOpenChange={(open) => !open && setWalletPanel(null)}>
         <DialogContent className="account-dialog account-wallet-dialog">

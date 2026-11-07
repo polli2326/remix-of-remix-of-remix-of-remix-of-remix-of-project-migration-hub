@@ -40,9 +40,6 @@ it("opens the authenticated dropdown and submits a deposit through the server ac
   setAccountSession(account);
 
   render(<AccountHeader />);
-  fireEvent.keyDown(screen.getByRole("button", { name: "Account menu for Sample User" }), {
-    key: "Enter",
-  });
   fireEvent.click(await screen.findByRole("menuitem", { name: "Deposit" }));
 
   fireEvent.change(await screen.findByLabelText("Amount (UGX)"), { target: { value: "5000" } });
@@ -62,9 +59,6 @@ it("submits a withdrawal request from the authenticated dropdown", async () => {
   setAccountSession(account);
 
   render(<AccountHeader />);
-  fireEvent.keyDown(screen.getByRole("button", { name: "Account menu for Sample User" }), {
-    key: "Enter",
-  });
   fireEvent.click(await screen.findByRole("menuitem", { name: "Withdraw" }));
 
   fireEvent.change(await screen.findByLabelText("Amount (UGX)"), { target: { value: "5000" } });
