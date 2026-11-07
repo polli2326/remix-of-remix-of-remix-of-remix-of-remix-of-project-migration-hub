@@ -264,6 +264,10 @@ export function MatchesPanel({ mode, slip }: { mode: "home" | "live"; slip: Slip
       {statsId && <StatsModal id={statsId} live={live} onClose={() => setStatsId(null)} />}
       <div className="offerButtons">
         {limit < list.length && <div className="buttons empty"><a className="curPointer" onClick={() => setLimit((l) => l + 10)}>SHOW MORE</a></div>}
+        {!live && list.length > 0 && <div className="buttons"><a className="curPointer" onClick={(x) => {
+          // Same click path as tapping each highlighted odd: only unselected highlighted odds are added.
+          x.currentTarget.closest(".mainOffer")?.querySelectorAll<HTMLElement>(".offerMatch .favorite").forEach((el) => el.click());
+        }}>HIGHLIGHTED ODDS ON THE TICKET</a></div>}
       </div>
     </div>
   );
