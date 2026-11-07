@@ -1,7 +1,9 @@
 # Account page matching
-- [ ] Connect real account actions: profile saving, password changes, branch withdrawals, record filters, ticket details, and messages.
+- [x] Connect real account actions: profile saving, password changes, branch withdrawals, record filters, ticket requests, and messages.
 - [x] Inspect Fortebet’s signed-in profile, deposit, withdrawal, transactions, tickets and messages.
 - [x] Replace mismatched account views and connect the profile menu to matching pages.
 - [x] Verify signed-in navigation and layouts without submitting payments or changing account details.
-- [ ] Complete profile saving and branch withdrawal: existing account actions do not provide these operations.
-- [ ] Verify transaction history values: Fortebet's account activity request currently returns an error.
+- [x] Connect profile saving and branch withdrawal to verified Fortebet actions; test safeguards without changing the live account.
+- [x] Verify real transaction requests and message content; Fortebet returns empty transaction history for this account.
+- [ ] Verify successful live profile/password changes and payments: requires the account owner to submit real changes or payments.
+- [ ] Verify live ticket detail: Fortebet returns an error for this account's virtual soccer ticket.

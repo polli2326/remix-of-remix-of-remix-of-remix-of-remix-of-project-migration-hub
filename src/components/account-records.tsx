@@ -52,7 +52,7 @@ export function AccountRecords({path}: {path: string}) {
   }
   async function openTicket(number: string, index: number, type: string) {
     setDetailError(''); setDetailLoading(index);
-    try {const result = await loadTicket({data:{number,type:type.startsWith('VSOCCER') ? 'VSOCCER' : type.startsWith('KENO') ? 'KENO' : undefined}}); if(result.ok) setTicket(result.ticket); else setDetailError(result.error === 'NOT_FOUND' ? 'Fortebet could not return details for this ticket.' : 'Unable to load this ticket. Please try again.');}
+    try {const category = type.startsWith('VSOCCER') ? 'VSOCCER' : type.startsWith('KENO') ? 'KENO' : ''; const result = await loadTicket({data:{number,...(category ? {type:category} : {})}}); if(result.ok) setTicket(result.ticket); else setDetailError(result.error === 'NOT_FOUND' ? 'Fortebet could not return details for this ticket.' : 'Unable to load this ticket. Please try again.');}
     catch {setDetailError('Unable to load this ticket. Please try again.');}
     finally {setDetailLoading(null);}
   }
