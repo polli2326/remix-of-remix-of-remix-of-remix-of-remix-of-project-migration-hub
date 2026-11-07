@@ -925,3 +925,25 @@ body:has(.virtual-viewer) .virtual-soccer-offer-header > div:first-child > span:
 .fb-account .fb-message-title strong {text-align:center;}
 .fb-message-header {display:grid;grid-template-columns:150px 1fr;background:var(--profile-row);padding:15px;text-align:center;font-weight:700;color:var(--profile-muted);}
 @media(max-width:800px){.fb-account .fb-message-title,.fb-message-header{grid-template-columns:100px minmax(0,1fr);}.fb-account .fb-message-title{font-size:11px;}}
+@media(max-width:800px){
+ #mainContainer[data-account-page="true"] {grid-template-columns:0 minmax(0,1fr) 0;}
+ #mainContainer[data-account-page="true"] #app-content-main,
+ #mainContainer[data-account-page="true"] #app-content,
+ #mainContainer[data-account-page="true"] #app-header,
+ #mainContainer[data-account-page="true"] #app-secheader,
+ #mainContainer[data-account-page="true"] #app-footer {min-width:0;max-width:100%;}
+ #mainContainer[data-account-page="true"] .simSubGrid {grid-template-columns:minmax(0,1fr);}
+ #mainContainer[data-account-page="true"] .header {height:auto;min-height:100px;flex-wrap:wrap;gap:10px;padding:12px;}
+ #mainContainer[data-account-page="true"] .header>div:first-of-type {display:none;}
+ #mainContainer[data-account-page="true"] .header>div:last-of-type {width:100%;margin-left:0;}
+ #mainContainer[data-account-page="true"] .account-header-authenticated {flex-wrap:wrap;justify-content:center;gap:5px;}
+ #mainContainer[data-account-page="true"] .secHeader {overflow:auto;}
+ #mainContainer[data-account-page="true"] .secHeader>ul {min-width:800px;}
+ #mainContainer[data-account-page="true"] .footer>div {flex-wrap:wrap;}
+ #mainContainer[data-account-page="true"] .footer>div>div {min-width:0;flex-basis:50%;}
+ .fb-account .fb-account-nav .fb-account-nav-link {height:auto;min-height:29px;}
+ .fb-account .fb-profile-columns {padding:14px;}
+ .fb-account .fb-profile-field {grid-template-columns:95px minmax(0,1fr);}
+ .fb-account .fb-profile-main {padding:0;}
+ .fb-account .fb-profile-confirm {padding:14px;}
+}

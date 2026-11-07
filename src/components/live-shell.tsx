@@ -319,7 +319,7 @@ export function LiveShell({ children, slip, active = "live", layout = "ticket" }
           </svg>
         </div>
         <div data-ce="app-base-layout" {...({ "_nghost-wbi-c209": "" } as any)}>
-          <div className={`${layout === "full" ? "col1" : "col2Ticket"} [gap:calc(15px_*_var(--factor))_calc(10px_*_var(--factor))] [min-height:100%]`} id="mainContainer" data-layout={layout} {...({ "_ngcontent-wbi-c209": "" } as any)}>
+          <div className={`${layout === "full" ? "col1" : "col2Ticket"} [gap:calc(15px_*_var(--factor))_calc(10px_*_var(--factor))] [min-height:100%]`} id="mainContainer" data-layout={layout} data-account-page={active === "account" ? "true" : undefined} {...({ "_ngcontent-wbi-c209": "" } as any)}>
             <div data-ce="app-header" id="app-header" {...({ "_ngcontent-wbi-c209": "", "_nghost-wbi-c202": "" } as any)}>
               <div className="header [top:0px]" {...({ "_ngcontent-wbi-c202": "" } as any)}>
                 <h1 {...({ "_ngcontent-wbi-c202": "" } as any)}>Fortebet</h1>
