@@ -104,3 +104,26 @@ function PaymentPage({path,phone,balance}: {path:string;phone:string;balance:num
       {!withdraw && !branch && <article className="fb-payment-article"><p className="fb-payment-option"><b>2.</b> SECOND OPTION - load from a different number:</p><div className="fb-payment-copy"><p>Make sure the different number is not registered with ForteBet. After completing the payment call 0800 202 202 or 0800 303 303 so the team can credit your account.</p></div><OtherNumberDeposit provider={provider}/><div className="fb-payment-copy"><h3>{provider==='mtn'?'9':'6'} QUICK STEPS - how to load money into my account</h3><ol className="fb-payment-steps">{(provider==='mtn'?['Dial *165#','Select Payments','Select Lotto & Sports Betting','Enter merchant code FORTEBET','Enter your username as payment reference','Enter the amount','Confirm using your mobile money PIN','Wait for processing','Check your confirmation message']:['Dial *185#','Select Payments','Select Betting and Gaming','Select FORTEBET','Enter the amount','Enter your username as the reference']).map((s,i)=><li key={s}><strong>STEP {i+1}</strong><p>{s}</p></li>)}</ol></div></article>}
   </>;
 }
+
+const OTHER_PREFIXES: Record<string, string[]> = { mtn: ['76', '77', '78', '79', '39'], airtel: ['70', '74', '75', '20'] };
+
+/** Deposit from a number not registered with Fortebet: Fortebet only accepts this through the
+ *  network's own menu, so this checks the number, prepares the exact steps and opens the dialer. */
+function OtherNumberDeposit({provider}: {provider: string}) {
+  const [phone,setPhone] = useState(''); const [amount,setAmount] = useState(''); const [error,setError] = useState(''); const [ready,setReady] = useState(false);
+  const mtn = provider === 'mtn'; const code = mtn ? '*165#' : '*185#';
+  function submit(e: FormEvent) {
+    e.preventDefault(); setReady(false);
+    const digits = phone.replace(/\D/g,'').replace(/^(256|0)/,'');
+    const value = Number(amount);
+    if (digits.length !== 9 || !OTHER_PREFIXES[mtn?'mtn':'airtel']!.some(p=>digits.startsWith(p))) return setError(`Enter a valid ${mtn?'MTN':'Airtel'} number, e.g. 0${mtn?'77':'70'}1234567.`);
+    if (!Number.isSafeInteger(value) || value < 1000 || value > 5_000_000) return setError('Enter a whole-number amount between 1,000 and 5,000,000 UGX.');
+    setError(''); setPhone('0'+digits); setReady(true);
+  }
+  return <form className="fb-inline-payment" onSubmit={submit} aria-label="Deposit from another number">
+    <div><label htmlFor="fb-other-phone">OTHER PHONE NUMBER</label><input id="fb-other-phone" type="tel" inputMode="tel" required value={phone} onChange={e=>{setPhone(e.target.value);setReady(false);}} placeholder={`0${mtn?'77':'70'}XXXXXXX`}/></div>
+    <div><label htmlFor="fb-other-amount">AMOUNT (UGX)</label><input id="fb-other-amount" type="number" inputMode="numeric" required min={1000} max={5000000} step={1} value={amount} onChange={e=>{setAmount(e.target.value);setReady(false);}} placeholder="Enter your requested amount"/><Button className="fb-account-action" type="submit">DEPOSIT</Button></div>
+    {error && <p role="alert">{error}</p>}
+    {ready && <p role="status">On the phone {phone}, dial <a href={`tel:${encodeURIComponent(code)}`}><strong>{code}</strong></a> and follow the steps below to pay {Number(amount).toLocaleString()} UGX. Use your username as the reference, then call 0800 202 202 or 0800 303 303 so your account is credited.</p>}
+  </form>;
+}
