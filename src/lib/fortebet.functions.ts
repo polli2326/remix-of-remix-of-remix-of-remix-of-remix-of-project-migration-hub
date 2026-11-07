@@ -39,6 +39,7 @@ export type OfferEvent = {
   c: Cell[];
   sc?: string | undefined; // live score
   st?: string | undefined; // live status
+  sb?: RawScoreboard; // live scoreboard (Fortebet status object)
 };
 export type QuickFilter = { key: string; marketId: number; spec: string; label: string; cols: string[]; outcomes: number[] };
 export type Offer = {
@@ -152,6 +153,7 @@ function normalise(d: Raw, at: number, live: boolean): Offer {
       c: cells,
       sc: score,
       st: status,
+      ...(live && e.scoreboard?.status ? { sb: e.scoreboard.status as RawScoreboard } : {}),
     });
   }
   events.sort((a, b) => a.s.localeCompare(b.s));
