@@ -14,6 +14,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as SlotsRouteImport } from './routes/slots'
 import { Route as VirtualSoccerRouteImport } from './routes/virtual-soccer'
 import { Route as LivePreviewRouteImport } from './routes/live_.preview'
+import { Route as ClientAccountSplatRouteImport } from './routes/client.account.$'
 import { Route as LiveEventIdRouteImport } from './routes/live_.event_.$id'
 import { Route as SlotsGameIdentRouteImport } from './routes/slots.game.$ident'
 
@@ -42,6 +43,11 @@ const LivePreviewRoute = LivePreviewRouteImport.update({
   path: '/live/preview',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ClientAccountSplatRoute = ClientAccountSplatRouteImport.update({
+  id: '/client/account/$',
+  path: '/client/account/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LiveEventIdRoute = LiveEventIdRouteImport.update({
   id: '/live_/event_/$id',
   path: '/live/event/$id',
@@ -59,6 +65,7 @@ export interface FileRoutesByFullPath {
   '/slots': typeof SlotsRouteWithChildren
   '/virtual-soccer': typeof VirtualSoccerRoute
   '/live/preview': typeof LivePreviewRoute
+  '/client/account/$': typeof ClientAccountSplatRoute
   '/live/event/$id': typeof LiveEventIdRoute
   '/slots/game/$ident': typeof SlotsGameIdentRoute
 }
@@ -68,6 +75,7 @@ export interface FileRoutesByTo {
   '/slots': typeof SlotsRouteWithChildren
   '/virtual-soccer': typeof VirtualSoccerRoute
   '/live/preview': typeof LivePreviewRoute
+  '/client/account/$': typeof ClientAccountSplatRoute
   '/live/event/$id': typeof LiveEventIdRoute
   '/slots/game/$ident': typeof SlotsGameIdentRoute
 }
@@ -78,6 +86,7 @@ export interface FileRoutesById {
   '/slots': typeof SlotsRouteWithChildren
   '/virtual-soccer': typeof VirtualSoccerRoute
   '/live_/preview': typeof LivePreviewRoute
+  '/client/account/$': typeof ClientAccountSplatRoute
   '/live_/event_/$id': typeof LiveEventIdRoute
   '/slots/game/$ident': typeof SlotsGameIdentRoute
 }
@@ -89,6 +98,7 @@ export interface FileRouteTypes {
     | '/slots'
     | '/virtual-soccer'
     | '/live/preview'
+    | '/client/account/$'
     | '/live/event/$id'
     | '/slots/game/$ident'
   fileRoutesByTo: FileRoutesByTo
@@ -98,6 +108,7 @@ export interface FileRouteTypes {
     | '/slots'
     | '/virtual-soccer'
     | '/live/preview'
+    | '/client/account/$'
     | '/live/event/$id'
     | '/slots/game/$ident'
   id:
@@ -107,6 +118,7 @@ export interface FileRouteTypes {
     | '/slots'
     | '/virtual-soccer'
     | '/live_/preview'
+    | '/client/account/$'
     | '/live_/event_/$id'
     | '/slots/game/$ident'
   fileRoutesById: FileRoutesById
@@ -117,6 +129,7 @@ export interface RootRouteChildren {
   SlotsRoute: typeof SlotsRouteWithChildren
   VirtualSoccerRoute: typeof VirtualSoccerRoute
   LivePreviewRoute: typeof LivePreviewRoute
+  ClientAccountSplatRoute: typeof ClientAccountSplatRoute
   LiveEventIdRoute: typeof LiveEventIdRoute
 }
 
@@ -157,6 +170,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LivePreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/client/account/$': {
+      id: '/client/account/$'
+      path: '/client/account/$'
+      fullPath: '/client/account/$'
+      preLoaderRoute: typeof ClientAccountSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/live_/event_/$id': {
       id: '/live_/event_/$id'
       path: '/live/event/$id'
@@ -190,6 +210,7 @@ const rootRouteChildren: RootRouteChildren = {
   SlotsRoute: SlotsRouteWithChildren,
   VirtualSoccerRoute: VirtualSoccerRoute,
   LivePreviewRoute: LivePreviewRoute,
+  ClientAccountSplatRoute: ClientAccountSplatRoute,
   LiveEventIdRoute: LiveEventIdRoute,
 }
 export const routeTree = rootRouteImport
