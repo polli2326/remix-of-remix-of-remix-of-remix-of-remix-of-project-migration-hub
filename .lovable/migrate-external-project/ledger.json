@@ -1,0 +1,6 @@
+[{"capability":"code","source":"code archive","outcome":"migrate","status":"done","next_action":"none"},
+{"capability":"schema/records","source":"none (no app database)","outcome":"not applicable","status":"verified","next_action":"none"},
+{"capability":"auth","source":"Fortebet API proxy with HttpOnly cookie","outcome":"preserve","status":"done","next_action":"live login test with a real Fortebet account"},
+{"capability":"external provider","source":"fortebet.ug public API + Socket.IO","outcome":"preserve","status":"done","next_action":"none"},
+{"capability":"secrets","source":"none required","outcome":"n/a","status":"verified","next_action":"none"},
+{"capability":"replit server config","source":"vite port 5000","outcome":"drop (platform metadata)","status":"done","next_action":"none"}]

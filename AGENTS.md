@@ -28,3 +28,13 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+- Live betting data comes from the public Fortebet feeds, fetched through server functions in src/lib/fortebet.functions.ts (with a short cache) because the browser cannot call those feeds directly.
+- Real-time odds/score changes come from the public Fortebet Socket.IO feed opened in the browser (src/lib/odds-feed.ts); snapshot data seeds the same store, and the newest timestamp wins, so every odds button and the bet slip read one source.
+- Offer filtering and ticket maths live as pure functions (src/lib/offer-filters.ts, src/lib/ticket.ts) with tests in src/test/offer-rules.test.ts, so rules stay checkable without the UI.
+- Bet slips are stored in the browser (src/lib/tickets-store.ts); real bet placement needs an authorized Fortebet account and is not wired.
+- Ticket check and ticket preview share one ticket window (src/components/ticket-check.tsx); ticket lookups go through the checkTicket server function, so both views stay identical.
+- Same-site <a href> clicks are turned into router navigation by one listener in src/routes/__root.tsx, so the imported pages' plain links never reload the app.
+- Casino lobby and jackpot-counter rules live in src/lib/casino.ts (tested in src/test/casino-rules.test.ts); games launch through the playCasinoGame server function, with real mode using the Fortebet session established by account login.
+- Account windows share one root-mounted dialog. Login and registration use server-only Fortebet API calls; the session stays in an HttpOnly app cookie and is forwarded only by server-side API requests.
+- Virtual Soccer keeps the imported route layout, reads its public offer through a cached server function, and scales one persistent Stream/Tracker iframe when expanded; local preview picks never submit wagers.

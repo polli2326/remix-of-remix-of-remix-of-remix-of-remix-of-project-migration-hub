@@ -142,3 +142,578 @@
     color: var(--color-foreground);
   }
 }
+
+/* site-import tokens: begin (generated; re-import replaces this block) */
+/* Imported clone roles use prefixed Tailwind utilities
+   (bg-site-import-primary, text-site-import-foreground, …); edit the
+   --site-import-* variables to restyle the clone. Unprefixed roles theme new UI. */
+:root {
+  --background: oklch(0.28467 0.024 277.93);
+  --site-import-background: oklch(0.28467 0.024 277.93);
+  --foreground: oklch(0.83649 0.00275 286.34);
+  --site-import-foreground: oklch(0.83649 0.00275 286.34);
+  --primary: oklch(0.74319 0.1252 86.81);
+  --site-import-primary: oklch(0.74319 0.1252 86.81);
+  --primary-foreground: oklch(0.145 0 0);
+  --site-import-primary-foreground: oklch(0.145 0 0);
+  --accent: oklch(0.69329 0.2058 42.88);
+  --site-import-accent: oklch(0.69329 0.2058 42.88);
+  --border: oklch(0.71911 0.00585 274.93);
+  --site-import-border: oklch(0.71911 0.00585 274.93);
+  --muted-foreground: oklch(0.6203 0.00928 271.27);
+  --site-import-muted-foreground: oklch(0.6203 0.00928 271.27);
+  --card: oklch(1 0 0 / 0.65);
+  --site-import-card: oklch(1 0 0 / 0.65);
+}
+/* Design tokens captured from the imported site, registered as Tailwind
+   utilities (bg-<name>, text-<name>, font-<name>). var() values live in
+   the imported stylesheet's :root. */
+@theme inline {
+  --font-sans: Roboto, sans-serif;
+  --color-site-import-background: var(--site-import-background);
+  --color-site-import-foreground: var(--site-import-foreground);
+  --color-site-import-primary: var(--site-import-primary);
+  --color-site-import-primary-foreground: var(--site-import-primary-foreground);
+  --color-site-import-accent: var(--site-import-accent);
+  --color-site-import-border: var(--site-import-border);
+  --color-site-import-muted-foreground: var(--site-import-muted-foreground);
+  --color-site-import-card: var(--site-import-card);
+  --color-brand-500: var(--brand-500);
+  --color-brand-600: var(--brand-600);
+  --color-brand-700: var(--brand-700);
+  --color-brand-800: var(--brand-800);
+  --color-brand-900: var(--brand-900);
+  --color-brand-glow: var(--brand-glow);
+}
+@theme reference {
+  --color-bg-main: #272936;
+  --color-font-main: #C9C9CB;
+}
+/* site-import tokens: end */
+
+:root {
+  --account-surface: oklch(1 0 0);
+  --brand-500: #00a65a;
+  --brand-600: #006e42;
+  --brand-700: #00894a;
+  --brand-800: #006b3a;
+  --brand-900: #004d2a;
+  --brand-glow: oklch(0.63 0.16 153 / 35%);
+  --account-field: oklch(0.97 0 0);
+  --account-line: oklch(0.78 0 0);
+  --account-ink: oklch(0.25 0.01 278);
+  --account-on-brand: oklch(1 0 0);
+  --account-login: oklch(0.74319 0.1252 86.81);
+  --account-login-hover: oklch(0.79 0.1252 86.81);
+  --account-overlay: oklch(0.08 0 0 / 75%);
+  --account-shadow: 0 20px 70px oklch(0.08 0 0 / 45%);
+  --virtual-panel: oklch(0.43 0.025 275);
+  --virtual-field: oklch(0.36 0.015 275);
+  --virtual-text: oklch(0.96 0 0);
+}
+@theme inline {
+  --color-account-surface: var(--account-surface);
+  --color-account-field: var(--account-field);
+  --color-account-line: var(--account-line);
+  --color-account-ink: var(--account-ink);
+  --color-account-overlay: var(--account-overlay);
+  --shadow-account: var(--account-shadow);
+}
+
+/* Keep account controls independent of the imported site's element rules. */
+#app-header .buttons > .account-header-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-sizing: border-box;
+  height: calc(30px * var(--factor, 1));
+  padding: 0 calc(15px * var(--factor, 1));
+  border: 0;
+  border-radius: calc(6px * var(--factor, 1));
+  font: inherit;
+  font-size: calc(12px * var(--factor, 1));
+  font-weight: 900;
+  text-transform: uppercase;
+  box-shadow: none;
+}
+#app-header .register > .account-header-button {
+  background: var(--account-surface);
+  color: var(--brand-600);
+}
+#app-header .login > .account-header-button {
+  background: var(--account-login);
+  color: var(--account-ink);
+}
+#app-header .login > .account-header-button:hover {
+  background: var(--account-login-hover);
+}
+#app-header .account-header-button svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+}
+.account-dialog button {
+  box-sizing: border-box;
+  box-shadow: none;
+  font-family: inherit;
+}
+.account-dialog .account-action {
+  height: 36px;
+  border: 1px solid var(--brand-500);
+  background: var(--brand-500);
+  color: var(--account-on-brand);
+  border-radius: 4px;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+.account-dialog .account-action:hover {
+  background: var(--brand-700);
+  border-color: var(--brand-700);
+}
+.account-dialog .account-secondary {
+  border: 1px solid var(--account-line);
+  background: var(--account-surface);
+  color: var(--account-ink);
+  border-radius: 4px;
+}
+.account-dialog .account-secondary:hover {
+  background: var(--account-field);
+}
+.account-dialog button[aria-label="Close account window"],
+.account-dialog button[aria-label="Show password"],
+.account-dialog button[aria-label="Hide password"] {
+  border: 0;
+  background: transparent;
+  color: var(--account-ink);
+}
+.account-dialog .account-link {
+  border: 0;
+  background: transparent;
+  color: var(--brand-500);
+}
+.account-dialog > header {
+  background: var(--brand-600);
+  color: var(--account-on-brand);
+}
+.account-dialog > header button[aria-label="Close account window"] {
+  color: var(--account-on-brand);
+}
+.account-dialog button svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+}
+
+.virtual-market-grid { display: grid; gap: 2px; padding: 0 5px; background: var(--virtual-panel); }
+.virtual-three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.virtual-two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.virtual-market-title { grid-column: 1 / -1; min-height: 30px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 11px; color: var(--virtual-text); }
+.virtual-odd-display { display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; gap: 4px; min-height: 30px; padding: 2px 8px; background: var(--virtual-field); color: var(--virtual-text); }
+.virtual-odd-display strong { color: var(--brand-500); }
+.virtual-wide { grid-column: 1 / -1; }
+.virtual-viewer { width: 100%; color: var(--virtual-text); }
+#app-content-main .virtual-viewer .virtual-view-tab { flex: 1; border: 0; border-radius: 4px 4px 0 0; background: var(--virtual-panel); color: var(--virtual-text); text-transform: uppercase; }
+#app-content-main .virtual-viewer .virtual-view-tab[aria-selected="true"] { background: var(--brand-500); }
+.virtual-view-frame { width: 100%; height: 242px; border: 0; display: block; }
+#app-content-main .virtual-viewer .virtual-expand { width: 100%; border: 0; border-radius: 0 0 4px 4px; background: var(--brand-500); color: var(--virtual-text); text-transform: uppercase; }
+.virtual-expand svg, .virtual-expanded svg { fill: none; stroke: currentColor; }
+.virtual-results-live { background: var(--virtual-panel); color: var(--virtual-text); }
+.virtual-expanded { background: var(--virtual-field); color: var(--virtual-text); }
+body:has(.virtual-viewer) #app-header .header { background: var(--brand-500); }
+.virtual-ticket > div:first-child { color: var(--brand-600); }
+.virtual-ticket .virtual-ticket-content-empty { color: var(--account-ink); }
+body:has(.virtual-viewer) .virtual-header-clock { display: flex; align-items: center; gap: 6px; white-space: nowrap; font-variant-numeric: tabular-nums; margin-left: 24px; margin-right: 12px; }
+body:has(.virtual-viewer) .virtual-soccer-offer-header > div:first-child > span:last-child { min-width: 54px; font-size: 20px; font-variant-numeric: tabular-nums; }
+#app-content-main button.virtual-odd-display { height: 30px; border: 1px solid transparent; border-radius: 0; font-size: 12px; font-weight: 400; background: var(--virtual-field); color: var(--virtual-text); }
+#app-content-main button.virtual-odd-display:hover { border-color: var(--brand-500); }
+#app-content-main button.virtual-odd-display[aria-pressed="true"] { background: var(--brand-500); color: var(--virtual-text); }
+#app-content-main button.virtual-odd-display[aria-pressed="true"] strong { color: var(--virtual-text); }
+.virtual-view-stage { width: 277px; height: 242px; position: relative; }
+.virtual-view-stage .virtual-view-frame { width: 277px; height: 242px; transform-origin: top left; }
+.virtual-viewer.is-expanded { position: relative; z-index: 20; }
+.virtual-viewer.is-expanded .virtual-view-stage { width: 554px; height: 484px; margin-left: -277px; }
+.virtual-viewer.is-expanded .virtual-view-frame { transform: scale(2); }
+.virtual-slip-preview { padding: 10px; color: var(--account-ink); font-size: 12px; }
+.virtual-slip-pick { border-bottom: 1px solid var(--account-line); padding: 6px 0; }
+.virtual-slip-pick button { border: 0; background: transparent; color: var(--account-ink); width: 24px; height: 24px; padding: 3px; }
+.virtual-slip-pick svg { fill: none; stroke: currentColor; }
+.virtual-stake { width: 110px; box-sizing: border-box; border: 1px solid var(--account-line); border-radius: 4px; background: var(--account-field); color: var(--account-ink); padding: 6px; }
+.virtual-slip-preview .virtual-clear { width: 100%; border: 1px solid var(--account-line); background: var(--account-field); color: var(--account-ink); }
+@media (max-width: 800px) {
+  .virtual-view-stage { width: 100%; overflow: hidden; }
+  .virtual-viewer.is-expanded .virtual-view-stage { width: 100%; height: 242px; margin-left: 0; }
+  .virtual-viewer.is-expanded .virtual-view-frame { transform: none; }
+  body:has(.virtual-viewer) #mainContainer { grid-template-columns: 8px minmax(0, 1fr) 8px; grid-template-rows: auto 50px 1fr auto; }
+  body:has(.virtual-viewer) #app-header .header { flex-wrap: wrap; height: auto; gap: 8px; padding: 10px 8px; }
+  body:has(.virtual-viewer) #app-header .header > div:first-of-type { display: none; }
+  body:has(.virtual-viewer) #app-header .header > div:last-of-type { margin-left: auto; }
+  body:has(.virtual-viewer) #app-header .buttons.hover { display: none; }
+  body:has(.virtual-viewer) #app-secheader { min-width: 0; overflow-x: auto; }
+  body:has(.virtual-viewer) .secHeader { min-width: 800px; }
+  body:has(.virtual-viewer) #app-footer { overflow: hidden; min-width: 0; }
+  #app-content-main .virtual-soccer-main { grid-template-columns: minmax(0, 1fr); }
+  #app-content-main .virtual-soccer-main > :nth-child(1) { grid-column: 1; }
+  #app-content-main .virtual-soccer-main > :nth-child(2) { padding: 0 8px; }
+  #app-content-main .virtual-soccer-offer { grid-template-columns: minmax(0, 1fr); row-gap: 10px; }
+  #app-content-main .virtual-soccer-sidebar { width: auto; margin-top: 16px; }
+  #app-content-main .virtual-soccer-offer-header { flex-wrap: wrap; justify-content: center; gap: 12px; }
+  .virtual-soccer-offer-header > div:nth-of-type(2) { order: -1; width: 100%; justify-content: center; }
+  .virtual-soccer-offer-header > div:nth-of-type(1), .virtual-soccer-offer-header > div:nth-of-type(3) { font-size: 12px; }
+}
+
+.account-header-entry {
+  display: flex;
+  align-items: center;
+  gap: calc(7px * var(--factor, 1));
+  white-space: nowrap;
+}
+.account-header-entry .buttons {
+  margin-left: calc(8px * var(--factor, 1));
+}
+.account-header-authenticated {
+  gap: 8px;
+}
+.account-wallet-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.account-balance-action,
+.account-wallet-button,
+.account-profile-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  border: 0;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 800;
+}
+.account-balance-action {
+  width: 24px;
+  height: 26px;
+  border-radius: 6px;
+  background: #172033;
+  color: #fff;
+}
+.account-balance-action svg {
+  width: 15px;
+  height: 15px;
+}
+.account-balance-action:hover,
+.account-profile-trigger:hover {
+  background: #26334a;
+}
+.account-balance-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 28px;
+  padding: 0 9px;
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 7px;
+  background: #111827;
+  color: #f7f8fb;
+  font-size: 12px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.account-balance-coin {
+  color: #f2cc44;
+  font-size: 10px;
+}
+.account-wallet-button {
+  gap: 6px;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 7px;
+  background: #9bef00;
+  color: #17210b;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+.account-wallet-button:hover {
+  background: #b2ff21;
+}
+.account-wallet-button svg {
+  width: 15px;
+  height: 15px;
+}
+.account-profile-trigger {
+  gap: 7px;
+  height: 34px;
+  max-width: 178px;
+  padding: 3px 9px 3px 5px;
+  border: 1px solid rgb(255 255 255 / 8%);
+  border-radius: 8px;
+  background: #172033;
+  color: #f7f8fb;
+  font-size: 12px;
+}
+.account-profile-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: #8ddd29;
+  color: #18230c;
+  font-size: 10px;
+  font-weight: 900;
+}
+.account-profile-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.account-profile-chevron {
+  width: 13px;
+  height: 13px;
+  flex: 0 0 auto;
+  opacity: .7;
+}
+.account-profile-menu {
+  width: 220px;
+  border-color: var(--account-line);
+  background: var(--account-surface);
+  color: var(--account-ink);
+}
+.account-profile-menu [role="menuitem"] {
+  cursor: pointer;
+}
+.account-profile-menu-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 9px 8px;
+  font-size: 13px;
+}
+.account-profile-menu-heading span {
+  color: #9aa4b6;
+  font-size: 11px;
+}
+.account-wallet-dialog {
+  max-width: 420px;
+}
+.account-dashboard-summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+.account-dashboard-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  font-size: 14px;
+}
+.account-dashboard-summary > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.account-dashboard-summary > div span {
+  color: #9aa4b6;
+  font-size: 12px;
+}
+.account-dashboard-balance {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid var(--account-line);
+  border-radius: 8px;
+  background: var(--account-field);
+}
+.account-dashboard-balance > span {
+  color: #aab3c2;
+  font-size: 12px;
+}
+.account-dashboard-balance strong {
+  font-size: 23px;
+  font-variant-numeric: tabular-nums;
+}
+.account-dashboard-balance small {
+  color: #aab3c2;
+  font-size: 12px;
+}
+.account-dashboard-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 14px;
+}
+.account-dashboard-actions .account-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+.account-action-secondary {
+  border-color: var(--account-line);
+  background: var(--account-field);
+  color: var(--account-ink);
+}
+.account-cashier-instructions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 14px;
+}
+.account-cashier-instructions p {
+  margin: 0;
+  color: #c3cad5;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.account-cashier-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+.account-cashier-instructions small {
+  color: #9aa4b6;
+  font-size: 11px;
+}
+.account-payment-back {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 9px;
+}
+.account-payment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.account-payment-form label {
+  color: var(--account-ink);
+  font-size: 12px;
+  font-weight: 700;
+}
+.account-payment-form input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 38px;
+  padding: 8px 10px;
+  border: 1px solid var(--account-line);
+  border-radius: 5px;
+  background: var(--account-field);
+  color: var(--account-ink);
+  font: inherit;
+  font-size: 14px;
+}
+.account-payment-form input:focus-visible {
+  outline: 2px solid var(--brand-500);
+  outline-offset: 1px;
+}
+.account-payment-form small {
+  color: #697386;
+  font-size: 11px;
+}
+.account-payment-success {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 10px;
+  border: 1px solid #86c989;
+  border-radius: 5px;
+  background: #edfaee;
+  color: #205b2a;
+  font-size: 12px;
+  line-height: 1.45;
+}
+.account-payment-error {
+  margin: 0;
+  color: #b42318;
+  font-size: 12px;
+  line-height: 1.4;
+}
+.account-pending-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 6px;
+  padding-top: 12px;
+  border-top: 1px solid var(--account-line);
+}
+.account-pending-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--account-ink);
+  font-size: 12px;
+}
+.account-refresh-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+}
+.account-refresh-button svg,
+.account-payment-back svg {
+  width: 15px;
+  height: 15px;
+}
+.account-pending-empty {
+  margin: 0;
+  color: #697386;
+  font-size: 12px;
+}
+.account-pending-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 150px;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  list-style: none;
+}
+.account-pending-list li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px 8px;
+  padding: 8px;
+  border: 1px solid var(--account-line);
+  border-radius: 5px;
+  background: var(--account-field);
+  color: var(--account-ink);
+  font-size: 11px;
+}
+.account-pending-list li span:nth-child(2) {
+  color: #697386;
+  text-align: right;
+}
+.account-pending-list li strong {
+  grid-column: 1 / -1;
+  font-variant-numeric: tabular-nums;
+}
+.account-logout-error {
+  margin: 10px 0 0;
+  color: #fca5a5;
+  font-size: 12px;
+}
+@media (max-width: 800px) {
+  .account-header-entry { gap: 4px; }
+  .account-header-entry .buttons { margin-left: 0; }
+  .account-profile-trigger { gap: 4px; max-width: 42px; padding-right: 4px; }
+  .account-profile-name, .account-profile-chevron { display: none; }
+  .account-wallet-button { padding: 0 8px; }
+}
