@@ -1,4 +1,4 @@
-import { getCookie, getRequest, getRequestProtocol, setCookie } from "@tanstack/react-start/server";
+import { getCookie, getRequest, setCookie } from "@tanstack/react-start/server";
 
 const SESSION_COOKIE = "fortebet_proxy_session";
 const SESSION_COOKIE_MAX_AGE = 60 * 60 * 24;
