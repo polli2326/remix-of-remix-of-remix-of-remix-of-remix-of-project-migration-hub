@@ -967,3 +967,8 @@ html body .account-header-authenticated .user .secretMenu>div:first-child li{pad
 html body .account-header-authenticated .user .secretMenu li>span.flRight{float:right}
 html body .account-header-authenticated .user .secretMenu li a{display:block;padding:4px 10px;margin:0 7px;line-height:normal}
 html body .account-header-authenticated .user .secretMenu li.separator{height:1px;margin:12px 5px 12px 7px;padding:0;background:#696a75}
+
+/* Balance menu attaches directly under the balance pill (no gap), like fortebet.ug. */
+html body .account-header-authenticated .user > div{position:relative}
+html body .account-header-authenticated .user > div:hover{background:#4f515e;border-radius:4px 4px 0 0}
+html body .account-header-authenticated .user > div > div.secretMenu{top:100%;margin-top:0}
