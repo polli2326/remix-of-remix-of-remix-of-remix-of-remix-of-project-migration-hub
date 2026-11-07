@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { queryOptions, useQuery } from "@tanstack/react-query";
-import { useHydrated, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { CASINO_ASSETS, CASINO_IMG, getCasinoGames, getCasinoJackpots, getCasinoWinners, playCasinoGame, type CasinoGame } from "@/lib/fortebet.functions";
 import { availableKeys, CASINO_CATEGORIES, CASINO_PROVIDERS, DEFAULT_CASINO_FILTER, filterGames, isFiltered, jackpotCounter, jackpotStart, popularGames, type CasinoFilter } from "@/lib/casino";
