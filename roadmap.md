@@ -1,9 +1,9 @@
 # Account page matching
-- [ ] Match and verify Fortebet live-page sport filters, event details, statistics, and schedule controls.
-- [ ] Live page navigation (sport tabs, search, My selection, Schedule) works like fortebet.ug
-- [ ] Virtual nav item shows the real current virtual game + countdown on every page
-- [ ] Pages arrive already filled (server-rendered data), then only update — no loading state on open
-- [ ] Aviator matches fortebet.ug and launches for real
+- [ ] Live match statistics: use each match's own Fortebet statistics widget (currently one fixed statistics window).
+- [x] Live page navigation (sport tabs, search, My selection, Schedule) works like fortebet.ug
+- [x] Virtual nav item shows the real current virtual game + countdown on every page
+- [x] Pages arrive already filled (server-rendered data), then only update — no loading state on open
+- [x] Aviator matches fortebet.ug and launches for real
 - [x] Fix login-cookie forwarding and false signed-out messages on unavailable account checks; verified real signed-in deposits, transactions, navigation and reload, with 36 account checks passing.
 - [x] Connect real account actions: profile saving, password changes, branch withdrawals, record filters, ticket requests, and messages.
 - [x] Inspect Fortebet’s signed-in profile, deposit, withdrawal, transactions, tickets and messages.
