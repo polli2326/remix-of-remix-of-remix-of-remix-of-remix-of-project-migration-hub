@@ -144,6 +144,10 @@ export function parseBetPlacementResult(payload: unknown, httpOk: boolean): BetP
     return { status: "pending", idTicket, message: "Fortebet is authorising this bet. Do not submit it again." };
   }
 
+  if (result !== "SB_AUTH_REJECTED" && result !== "SB_CHECK_FAILED") {
+    return { status: "unknown", idTicket: text(data["idTicket"]) || undefined, message: UNCONFIRMED_BET_MESSAGE };
+  }
+
   const checks = Array.isArray(data["check"]) ? data["check"] : [];
   const codes = checks.flatMap((check) => {
     if (!check || typeof check !== "object") return [];
