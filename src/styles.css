@@ -926,7 +926,7 @@ body:has(.virtual-viewer) .virtual-soccer-offer-header > div:first-child > span:
 .fb-message-header {display:grid;grid-template-columns:150px 1fr;background:var(--profile-row);padding:15px;text-align:center;font-weight:700;color:var(--profile-muted);}
 @media(max-width:800px){.fb-account .fb-message-title,.fb-message-header{grid-template-columns:100px minmax(0,1fr);}.fb-account .fb-message-title{font-size:11px;}}
 @media(max-width:800px){
- #mainContainer[data-account-page="true"] {grid-template-columns:0 minmax(0,1fr) 0;}
+ #mainContainer[data-account-page="true"] {grid-template-columns:0 minmax(0,1fr) 0;grid-template-rows:140px 50px 1fr auto;}
  #mainContainer[data-account-page="true"] #app-content-main,
  #mainContainer[data-account-page="true"] #app-content,
  #mainContainer[data-account-page="true"] #app-header,
