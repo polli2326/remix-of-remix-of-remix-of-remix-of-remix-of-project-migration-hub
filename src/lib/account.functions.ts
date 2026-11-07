@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { validateBranchAmount } from './account-inputs';
+import { validateBranchAmount, validateProfileChanges, validateRecordQuery } from './account-inputs';
 
 export type AccountActionResult =
   { ok: true; message: string; account?: FortebetAccount } | { ok: false; message: string };
@@ -218,4 +218,28 @@ export const requestBranchWithdrawal = createServerFn({method:'POST'})
   .handler(async ({data}): Promise<MobileMoneyActionResult> => {
     const {submitBranchWithdrawal} = await import('./account-service.server');
     return submitBranchWithdrawal(data.amount);
+  });
+
+export const saveAccountProfile = createServerFn({method:'POST'})
+  .inputValidator(validateProfileChanges)
+  .handler(async ({data}):Promise<AccountActionResult> => {
+    const {submitAccountProfile} = await import('./account-service.server');
+    return submitAccountProfile(data);
+  });
+
+export const getAccountRecords = createServerFn({method:'POST'})
+  .inputValidator(validateRecordQuery)
+  .handler(async ({data}):Promise<FortebetClientRecord> => {
+    const {loadAccountRecords} = await import('./account-service.server');
+    return loadAccountRecords(data);
+  });
+
+export const getAccountMessage = createServerFn({method:'POST'})
+  .inputValidator((input:{messageId:number})=> {
+    if (!Number.isSafeInteger(input?.messageId) || input.messageId <= 0) throw new Error('Choose a valid message.');
+    return {messageId:input.messageId};
+  })
+  .handler(async ({data}):Promise<FortebetClientRecord> => {
+    const {loadAccountMessage} = await import('./account-service.server');
+    return loadAccountMessage(data.messageId);
   });
