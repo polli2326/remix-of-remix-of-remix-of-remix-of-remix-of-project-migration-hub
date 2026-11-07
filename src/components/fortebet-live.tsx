@@ -9,6 +9,9 @@ import { possibleWin, stakeError, totalOdds, vipPoints, TICKET_RULES } from "@/l
 import { useSels, type Sel, type Slip } from "@/lib/tickets-store";
 import { useOfferFilters } from "@/components/offer-context";
 import { LockIcon, TicketSheet, sheetBtn } from "@/components/ticket-check";
+import { PlaceBetDialog, type PlaceBetSnapshot } from "@/components/place-bet-dialog";
+import { useAccountSession } from "@/lib/account-state";
+import { openLogin } from "@/lib/login-modal";
 
 export { useSels };
 export type { Sel, Slip };
@@ -507,10 +510,12 @@ export function EventDetail({ id, live, onClose, sels, toggle }: { id: string; l
 // ---------- Bet slip ----------
 export function BetSlip({ slip, title = "Sportsbook" }: { slip: Slip; title?: string }) {
   useFeedVersion();
+  const session = useAccountSession();
   const { sels, remove, clear, active, setActive, counts, stake, setStake, accept } = slip;
   const [stakeText, setStakeText] = useState(String(stake));
   const [notice, setNotice] = useState<string | null>(null);
   const [preview, setPreview] = useState(false);
+  const [betSnapshot, setBetSnapshot] = useState<PlaceBetSnapshot | null>(null);
   useEffect(() => setStakeText(String(stake)), [stake, active]);
   const items = sels.map((s) => {
     const o = getOdd(s.oddsId);
@@ -601,7 +606,32 @@ export function BetSlip({ slip, title = "Sportsbook" }: { slip: Slip; title?: st
             <div style={{ ...btn, background: "#cea642", color: "#fff", fontSize: 13, padding: "6px 0", marginTop: 5, borderRadius: 3 }} onClick={() => setNotice("Saving an i-Ticket needs a connection to Fortebet's betting system, which isn't set up yet. Your ticket is kept on this device.")}>SAVE i-TICKET</div>
             <div style={{ textAlign: "center", color: "#888", margin: "4px 0", fontSize: 11 }}>- OR -</div>
             <div style={{ ...btn, background: canPlace ? G : "#d0d0d2", color: canPlace ? "#fff" : "#999", fontSize: 13, padding: "6px 0", borderRadius: 3, cursor: canPlace ? "pointer" : "not-allowed" }}
-              onClick={() => canPlace && setNotice("Placing real bets needs a logged-in Fortebet account, which this site can't do yet.")}>PLACE BET</div>
+              role="button" aria-label="Place real bet" tabIndex={canPlace ? 0 : -1}
+              onKeyDown={(event) => { if ((event.key === "Enter" || event.key === " ") && canPlace) event.currentTarget.click(); }}
+              onClick={() => {
+                if (!canPlace) return;
+                if (!session.account) {
+                  setNotice("Sign in to your Fortebet account, then confirm this real bet.");
+                  openLogin();
+                  return;
+                }
+                setNotice(null);
+                setBetSnapshot({
+                  stake,
+                  totalOdds: total,
+                  possibleWin: win,
+                  picks: items.map(({ s, cur }) => ({
+                    key: s.key,
+                    oddsId: s.oddsId,
+                    eventId: s.eventId,
+                    odds: cur,
+                    live: s.live,
+                    match: s.match,
+                    market: s.market,
+                    outcome: s.outcome,
+                  })),
+                });
+              }}>PLACE BET</div>
             {notice && <div style={{ marginTop: 6, fontSize: 11, color: "#333", background: "#f1f1f3", padding: 6, borderRadius: 3, display: "flex", gap: 6 }}><span style={{ flex: 1 }}>{notice}</span><a className="curPointer" onClick={() => setNotice(null)}>✕</a></div>}
           </div>
         </div>
@@ -634,6 +664,7 @@ export function BetSlip({ slip, title = "Sportsbook" }: { slip: Slip; title?: st
           />
         );
       })()}
+      <PlaceBetDialog snapshot={betSnapshot} onClose={() => setBetSnapshot(null)} onAccepted={clear} />
     </div>
   );
 }
