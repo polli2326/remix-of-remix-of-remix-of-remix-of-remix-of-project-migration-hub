@@ -497,7 +497,7 @@ export async function submitFortebetRegistration(
       ok: false,
       message: apiFailureMessage(
         payload,
-        "Registration could not be completed. Check your details and try again.",
+        `Fortebet did not accept the registration right now (code ${response.status}). Please try again in a moment.`,
       ),
     };
   } catch (error) {
