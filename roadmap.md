@@ -1,4 +1,5 @@
 # Account page matching
+- [x] Fix login-cookie forwarding and false signed-out messages on unavailable account checks; verified real signed-in deposits, transactions, navigation and reload, with 36 account checks passing.
 - [x] Connect real account actions: profile saving, password changes, branch withdrawals, record filters, ticket requests, and messages.
 - [x] Inspect Fortebet’s signed-in profile, deposit, withdrawal, transactions, tickets and messages.
 - [x] Replace mismatched account views and connect the profile menu to matching pages.

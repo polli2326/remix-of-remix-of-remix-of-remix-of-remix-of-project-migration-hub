@@ -5,6 +5,7 @@ const session = vi.hoisted(() => ({
   captureCookies: vi.fn(),
 }));
 const fetchMock = vi.hoisted(() => vi.fn());
+vi.mock('@tanstack/react-start/server', () => ({ setResponseHeader: vi.fn() }));
 
 vi.mock("@/lib/account-session.server", () => ({
   getFortebetSessionCookieHeader: session.getCookieHeader,
@@ -57,8 +58,9 @@ it("sends a validated deposit to Fortebet with the logged-in server cookie", asy
   const result = await submitMobileMoneyDeposit(5_000);
   expect(result).toEqual({ ok: true, message: "Payment prompt sent." });
   expect(fetchMock).toHaveBeenCalledTimes(2);
-  expect(fetchMock.mock.calls[0]![0]).toBe("https://fortebet.ug/api/web/v1/client/info");
-  const paymentCall = fetchMock.mock.calls[1]!;
+  expect(fetchMock.mock.calls[0]?.[0]).toBe("https://fortebet.ug/api/web/v1/client/info");
+  const paymentCall = fetchMock.mock.calls[1];
+  if (!paymentCall) throw new Error('Expected a payment request');
   expect(paymentCall[0]).toBe("https://fortebet.ug/api/web/v1/mobilemoney/request-payin");
   const options = paymentCall[1] as RequestInit;
   expect(options.method).toBe("POST");
@@ -77,7 +79,8 @@ it("sends a payout through the working singular Fortebet route", async () => {
 
   const result = await submitMobileMoneyPayout(10_000);
   expect(result).toEqual({ ok: true, message: "Withdrawal request received." });
-  const payoutCall = fetchMock.mock.calls[1]!;
+  const payoutCall = fetchMock.mock.calls[1];
+  if (!payoutCall) throw new Error('Expected a payout request');
   expect(payoutCall[0]).toBe("https://fortebet.ug/api/web/v1/mobilemoney/request-payout");
   const options = payoutCall[1] as RequestInit;
   expect(JSON.parse(options.body as string)).toEqual({ amount: 10_000, id_provider: -1 });
@@ -106,7 +109,8 @@ it("loads pending payment requests and returns only the fields used by the UI", 
       },
     ],
   });
-  const pendingCall = fetchMock.mock.calls[1]!;
+  const pendingCall = fetchMock.mock.calls[1];
+  if (!pendingCall) throw new Error('Expected a pending request lookup');
   expect(pendingCall[0]).toBe("https://fortebet.ug/api/web/v1/mobilemoney/pending-payins");
   expect(JSON.parse((pendingCall[1] as RequestInit).body as string)).toEqual({});
 });

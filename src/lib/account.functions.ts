@@ -11,7 +11,7 @@ export type FortebetAccount = {
   currency: string;
 };
 
-export type FortebetAccountResult = { ok: true; account: FortebetAccount } | { ok: false };
+export type FortebetAccountResult = { ok: true; account: FortebetAccount } | { ok: false; reason?: 'unauthenticated' | 'unavailable' };
 
 export type MobileMoneyPendingRequest = {
   requestTimestamp: string;
