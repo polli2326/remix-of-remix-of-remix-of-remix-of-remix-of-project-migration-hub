@@ -145,6 +145,12 @@ function isLoggedAccount(
   return account.ok;
 }
 
+function accountFailureMessage(account: FortebetAccountResult, signedOutMessage: string) {
+  return !account.ok && account.reason === 'unavailable'
+    ? 'Unable to confirm your account with Fortebet. Please try again.'
+    : signedOutMessage;
+}
+
 function readMobileMoneyMessage(data: MobileMoneyApiResult | null | undefined, fallback: string) {
   for (const value of [data?.message, data?.subMessage, data?.error]) {
     if (typeof value === "string" && value.trim()) return value.trim().slice(0, 300);
@@ -207,7 +213,7 @@ async function loadClientRecord(path: string, body: unknown = {}): Promise<Forte
 export async function loadSignedInAccountActivity(): Promise<SignedInAccountActivityResult> {
   const account = await loadFortebetAccount(12_000);
   if (!isLoggedAccount(account)) {
-    return { ok: false, message: "Sign in to view your Fortebet account activity." };
+    return { ok: false, message: accountFailureMessage(account, "Sign in to view your Fortebet account activity.") };
   }
 
   const [profile, preferences, transactions, tickets, messages, session] = await Promise.all([
@@ -272,11 +278,15 @@ export async function submitFortebetLogin(data: {
       password: data.password,
     });
     if (response.ok && payload?.status === "OK" && payload.data) {
-      const account = accountFromApi(payload.data, data.nickname);
+      const verified = await loadFortebetAccount(12_000);
+      if (!verified.ok) {
+        clearFortebetSessionCookie();
+        return { ok: false, message: 'Your login could not be confirmed. Please try signing in again.' };
+      }
       return {
         ok: true,
         message: "You’re now logged in.",
-        ...(account ? { account } : {}),
+        account: verified.account,
       };
     }
     return {
@@ -290,13 +300,15 @@ export async function submitFortebetLogin(data: {
 
 export async function loadFortebetAccount(timeoutMs?: number): Promise<FortebetAccountResult> {
   try {
-    const { response, payload } = await requestFortebet("/client/info", "POST", {}, timeoutMs);
+    if (!getFortebetSessionCookieHeader()) return { ok: false, reason: 'unauthenticated' };
+    const { response, payload } = await requestFortebet("/client/info", "POST", {}, timeoutMs ?? 12_000);
+    if (response.status >= 500 || response.status === 429 || !payload) return { ok: false, reason: 'unavailable' };
     const account = accountFromApi(payload?.data);
     return response.ok && payload?.status === "OK" && account
       ? { ok: true, account }
-      : { ok: false };
+      : { ok: false, reason: 'unauthenticated' };
   } catch {
-    return { ok: false };
+    return { ok: false, reason: 'unavailable' };
   }
 }
 
@@ -306,7 +318,7 @@ export async function loadPendingMobileMoney(
   try {
     const account = await loadFortebetAccount();
     if (!isLoggedAccount(account)) {
-      return { ok: false, message: "Sign in to view your payment requests." };
+      return { ok: false, message: accountFailureMessage(account, "Sign in to view your payment requests.") };
     }
     const path = kind === "payin" ? "/mobilemoney/pending-payins" : "/mobilemoney/pending-payouts";
     const { response, payload } = await requestFortebet(path, "POST", {});
@@ -322,7 +334,7 @@ export async function loadPendingMobileMoney(
 export async function submitMobileMoneyDeposit(amount: number): Promise<MobileMoneyActionResult> {
   const account = await loadFortebetAccount();
   if (!isLoggedAccount(account)) {
-    return { ok: false, message: "Sign in again before requesting a deposit." };
+    return { ok: false, message: accountFailureMessage(account, "Sign in again before requesting a deposit.") };
   }
   return submitMobileMoneyRequest(
     PAYIN_PATH,
@@ -334,7 +346,7 @@ export async function submitMobileMoneyDeposit(amount: number): Promise<MobileMo
 export async function submitMobileMoneyPayout(amount: number): Promise<MobileMoneyActionResult> {
   const account = await loadFortebetAccount();
   if (!isLoggedAccount(account)) {
-    return { ok: false, message: "Sign in again before requesting a withdrawal." };
+    return { ok: false, message: accountFailureMessage(account, "Sign in again before requesting a withdrawal.") };
   }
   if (amount > account.account.balance) {
     return { ok: false, message: "The withdrawal amount exceeds your available balance." };
@@ -348,7 +360,7 @@ export async function submitMobileMoneyPayout(amount: number): Promise<MobileMon
 
 export async function submitBranchWithdrawal(amount: number): Promise<MobileMoneyActionResult> {
   const account = await loadFortebetAccount(12_000);
-  if (!account.ok) return {ok:false,message:'Sign in again before requesting a withdrawal.'};
+  if (!account.ok) return {ok:false,message:accountFailureMessage(account,'Sign in again before requesting a withdrawal.')};
   if (!Number.isSafeInteger(amount) || amount <= 0 || amount > account.account.balance) {
     return {ok:false,message:'The withdrawal amount must be a whole number within your available balance.'};
   }
@@ -356,16 +368,19 @@ export async function submitBranchWithdrawal(amount: number): Promise<MobileMone
 }
 
 export async function loadAccountRecords(query: AccountRecordQuery):Promise<FortebetClientRecord> {
-  if (!(await loadFortebetAccount(12_000)).ok) return {ok:false,message:'Sign in to view your account records.'};
+  const account = await loadFortebetAccount(12_000);
+  if (!account.ok) return {ok:false,message:accountFailureMessage(account,'Sign in to view your account records.')};
   const path = query.path === 'messages' ? '/client/messages/get' : query.path.startsWith('bets/') ? '/client/tickets/get' : '/client/transactions/get';
   return loadClientRecord(path, recordRequest(query));
 }
 export async function loadAccountMessage(messageId:number):Promise<FortebetClientRecord> {
-  if (!(await loadFortebetAccount(12_000)).ok) return {ok:false,message:'Sign in to read your messages.'};
+  const account = await loadFortebetAccount(12_000);
+  if (!account.ok) return {ok:false,message:accountFailureMessage(account,'Sign in to read your messages.')};
   return loadClientRecord('/client/messages/detail', {messageId,lang:'EN'});
 }
 export async function submitAccountProfile(input:ProfileChanges):Promise<AccountActionResult> {
-  if (!(await loadFortebetAccount(12_000)).ok) return {ok:false,message:'Sign in again before saving changes.'};
+  const account = await loadFortebetAccount(12_000);
+  if (!account.ok) return {ok:false,message:accountFailureMessage(account,'Sign in again before saving changes.')};
   try {
     const current = await loadClientRecord('/client/profile/get');
     if (!current.ok || !current.data || typeof current.data !== 'object' || Array.isArray(current.data)) return {ok:false,message:'Unable to load your profile before saving. Please try again.'};
