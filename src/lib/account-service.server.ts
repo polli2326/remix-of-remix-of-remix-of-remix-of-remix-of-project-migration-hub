@@ -85,6 +85,33 @@ async function requestFortebet(
   return { response, payload };
 }
 
+
+const REGISTRATION_ERRORS: Record<string, Record<string, string>> = {
+  NICKNAME: { ERR_VALUE_DUPLICITY: "This username is already taken, choose another one.", ERR_BAD_FORMAT: "Bad format of username, choose letters and numbers only.", ERR_REQUIRED: "Username is required." },
+  PHONE: { ERR_VALUE_DUPLICITY: "This phone number is already registered, use another one.", ERR_BAD_FORMAT: "Bad value of phone number.", ERR_MIN_LENGTH: "Phone number is too short.", ERR_BLACKLISTED: "This number is self excluded." },
+  EMAIL: { ERR_VALUE_DUPLICITY: "This e-mail is already registered, choose another one.", ERR_BAD_FORMAT: "Wrong format of e-mail address.", ERR_BAD_VALUE: "Wrong format of e-mail address." },
+  RECORD_NUMBER: { ERR_VALUE_DUPLICITY: "This NIN is already registered.", ERR_NOT_VALID: "The NIN is not valid.", ERR_BAD_FORMAT: "The NIN has a bad format.", ERR_NOT_MATCH: "The birth year in your NIN does not match your birth date.", ERR_BAD_VALUE: "The birth year in your NIN is out of the allowed range." },
+  FIRSTNAME: { ERR_BAD_FORMAT: "Your first name has bad format.", ERR_REQUIRED: "Your first name is required." },
+  LASTNAME: { ERR_BAD_FORMAT: "Your last name has bad format.", ERR_REQUIRED: "Your last name is required." },
+  BIRTHDATE: { ERR_BAD_VALUE: "You must be at least 18 years old.", ERR_BAD_FORMAT: "Enter a valid birth date." },
+};
+
+/** Turns Fortebet's registration checks (e.g. NICKNAME/ERR_VALUE_DUPLICITY) into readable reasons. */
+export function registrationFailureMessage(data: unknown): string {
+  const record = data && typeof data === "object" ? (data as Record<string, unknown>) : {};
+  const checks = Array.isArray(record["checks"]) ? record["checks"] : [];
+  const reasons = checks
+    .map((check) => {
+      const item = (check ?? {}) as Record<string, unknown>;
+      const field = String(item["attr_name"] ?? "").toUpperCase();
+      const code = String(item["error"] ?? "");
+      return REGISTRATION_ERRORS[field]?.[code] ?? (field ? `${field.toLowerCase().replace(/_/g, " ")}: ${code.replace(/^ERR_/, "").replace(/_/g, " ").toLowerCase()}` : "");
+    })
+    .filter(Boolean);
+  if (reasons.length) return [...new Set(reasons)].join(" ");
+  return "Registration could not be completed, please check the entered data.";
+}
+
 function apiFailureMessage(payload: ApiPayload | null, fallback: string): string {
   const data = payload?.data;
   if (data && typeof data === "object") {
@@ -456,6 +483,9 @@ export async function submitFortebetRegistration(
     const result = payload?.data as Record<string, unknown> | null | undefined;
     if (response.ok && payload?.status === "OK" && result?.["result"] === true) {
       return { ok: true, message: "Registration complete. You can now log in." };
+    }
+    if (response.ok && payload?.status === "OK" && result) {
+      return { ok: false, message: registrationFailureMessage(result) };
     }
     return {
       ok: false,
