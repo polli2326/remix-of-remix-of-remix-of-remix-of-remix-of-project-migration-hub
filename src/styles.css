@@ -899,6 +899,11 @@ body:has(.virtual-viewer) .virtual-soccer-offer-header > div:first-child > span:
 .fb-record-error {margin:10px 15px;color:var(--profile-muted);}
 .fb-table-scroll {overflow:auto;}
 .fb-account-signin {padding:30px;}
+.fb-profile-fields {border:0;margin:0;padding:0;min-width:0;}
+.fb-profile-fields:disabled {opacity:0.7;}
+.fb-message-content {padding:12px 15px;background:var(--profile-panel);}
+.fb-message-text {white-space:pre-wrap;overflow-wrap:anywhere;}
+.fb-record-paging {justify-content:flex-end;margin-top:10px;}
 @media(max-width:800px) {
  .fb-account {grid-template-columns:1fr;gap:15px;}
  .fb-account-nav {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));}
