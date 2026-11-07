@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { validateBranchAmount } from './account-inputs';
 
 export type AccountActionResult =
   { ok: true; message: string; account?: FortebetAccount } | { ok: false; message: string };
@@ -211,3 +212,10 @@ export const logoutFromFortebet = createServerFn({ method: "POST" }).handler(
     return submitFortebetLogout();
   },
 );
+
+export const requestBranchWithdrawal = createServerFn({method:'POST'})
+  .inputValidator(validateBranchAmount)
+  .handler(async ({data}): Promise<MobileMoneyActionResult> => {
+    const {submitBranchWithdrawal} = await import('./account-service.server');
+    return submitBranchWithdrawal(data.amount);
+  });

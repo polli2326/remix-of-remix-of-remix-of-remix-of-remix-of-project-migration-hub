@@ -16,6 +16,7 @@ import type {
   SignedInAccountActivityResult,
 } from "@/lib/account.functions";
 import { clearFortebetSessionCookie } from "@/lib/account-session.server";
+import { setResponseHeader } from '@tanstack/react-start/server';
 
 const API_BASE = "https://fortebet.ug/api/web/v1";
 const PAYIN_PATH = "/mobilemoney/request-payin";
@@ -68,6 +69,7 @@ async function requestFortebet(
   timeoutMs?: number,
 ): Promise<{ response: Response; payload: ApiPayload | null }> {
   const headers = new Headers({ Accept: "application/json" });
+  setResponseHeader('Cache-Control', 'no-store');
   const cookie = getFortebetSessionCookieHeader();
   if (cookie) headers.set("Cookie", cookie);
   if (body !== undefined) headers.set("Content-Type", "application/json");
@@ -341,6 +343,15 @@ export async function submitMobileMoneyPayout(amount: number): Promise<MobileMon
     { amount, id_provider: -1 },
     "The withdrawal request could not be completed.",
   );
+}
+
+export async function submitBranchWithdrawal(amount: number): Promise<MobileMoneyActionResult> {
+  const account = await loadFortebetAccount(12_000);
+  if (!account.ok) return {ok:false,message:'Sign in again before requesting a withdrawal.'};
+  if (!Number.isSafeInteger(amount) || amount <= 0 || amount > account.account.balance) {
+    return {ok:false,message:'The withdrawal amount must be a whole number within your available balance.'};
+  }
+  return submitMobileMoneyRequest('/client/paymethods/payout-request', {amount}, 'The branch withdrawal request could not be completed.');
 }
 
 export async function submitFortebetLogout(): Promise<AccountActionResult> {
