@@ -150,7 +150,7 @@ function AccountForm({ mode }: { mode: AccountWindow }) {
         {register
           ? <Button className={action} onClick={openLogin}>Login now</Button>
           : <Button className={action} onClick={closeLogin}>Continue</Button>}
-      </div> : <form onSubmit={submit} noValidate className={register ? "grid gap-7 p-5 md:grid-cols-2" : "space-y-3 px-8 py-7"}>
+      </div> : <form onSubmit={submit} noValidate className={register ? "grid gap-7 p-5 md:grid-cols-2 md:items-start" : "space-y-3 px-8 py-7"}>
         {register ? <>
           <div className="space-y-3">
             <RegistrationField name="first-name" label="Name" placeholder="Enter your FIRST NAME" required />
@@ -172,7 +172,7 @@ function AccountForm({ mode }: { mode: AccountWindow }) {
             <div className="md:pl-[90px]"><Button type="submit" disabled={submitting || resourcesLoading || Boolean(countryError) || countries.length === 0} className={action}>{submitting ? "Submitting…" : resourcesLoading ? "Loading…" : "Confirm registration"}</Button></div>
             <div className="text-center text-xs">Already registered? <Button variant="link" type="button" onClick={openLogin} className="account-link h-auto p-1 text-brand-500">Login</Button></div>
           </div>
-          <aside aria-label="How to register" className="space-y-3 border-t border-account-line pt-4 text-xs leading-5 md:border-t-0 md:pt-0">
+          <aside aria-label="How to register" className="space-y-3 md:max-h-[calc(92dvh-150px)] md:overflow-y-auto md:pr-2 border-t border-account-line pt-4 text-xs leading-5 md:border-t-0 md:pt-0">
             <h3 className="font-bold uppercase">How to register</h3>
             {resourcesLoading && <p className="text-site-import-muted-foreground">Loading registration guide…</p>}
             {guideMessage && <p role="status" className="text-site-import-muted-foreground">{guideMessage}</p>}
