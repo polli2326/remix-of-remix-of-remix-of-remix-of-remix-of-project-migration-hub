@@ -1,15 +1,10 @@
 import { useEffect, useState, type FormEvent } from "react";
 import {
   ArrowLeft,
-  Activity,
-  ChevronDown,
   CircleUserRound,
-  LayoutDashboard,
-  LogOut,
   Minus,
   Plus,
   RefreshCw,
-  Wallet,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,13 +14,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   getFortebetAccount,
   getPendingMobileMoney,
