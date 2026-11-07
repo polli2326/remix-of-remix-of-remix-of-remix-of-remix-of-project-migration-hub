@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { LiveShell } from "@/components/live-shell";
-import { LivePreviewList, BetSlip, useSels } from "@/components/fortebet-live";
+import { LivePreviewList, BetSlip, useSels, liveQuery } from "@/components/fortebet-live";
 
 export const Route = createFileRoute("/live_/preview")({
   head: () => ({ meta: [
@@ -11,6 +11,7 @@ export const Route = createFileRoute("/live_/preview")({
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary_large_image" },
   ] }),
+  loader: ({ context }) => context.queryClient.ensureQueryData(liveQuery).then(() => null),
   component: LivePage,
 });
 

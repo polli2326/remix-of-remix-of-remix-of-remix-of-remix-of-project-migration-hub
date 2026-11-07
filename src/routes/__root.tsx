@@ -13,6 +13,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { LoginModal } from "../components/login-modal";
+import { virtualOfferQuery } from "../components/virtual-nav";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
 function NotFoundComponent() {
@@ -95,6 +96,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
     ],
   }),
+  // The Virtual menu item (next match + countdown) is on every page, so its data arrives with every page.
+  loader: ({ context }) => context.queryClient.ensureQueryData(virtualOfferQuery).then(() => null),
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,

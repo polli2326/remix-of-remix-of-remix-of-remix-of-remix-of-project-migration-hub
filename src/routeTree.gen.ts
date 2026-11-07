@@ -11,10 +11,12 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AviatorRouteImport } from './routes/aviator'
 import { Route as SlotsRouteImport } from './routes/slots'
 import { Route as VirtualSoccerRouteImport } from './routes/virtual-soccer'
 import { Route as LiveCalendarRouteImport } from './routes/live_.calendar'
 import { Route as LivePreviewRouteImport } from './routes/live_.preview'
+import { Route as AviatorGameModeRouteImport } from './routes/aviator.game.$mode'
 import { Route as ClientAccountSplatRouteImport } from './routes/client.account.$'
 import { Route as LiveEventIdRouteImport } from './routes/live_.event_.$id'
 import { Route as SlotsGameIdentRouteImport } from './routes/slots.game.$ident'
@@ -27,6 +29,11 @@ const IndexRoute = IndexRouteImport.update({
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AviatorRoute = AviatorRouteImport.update({
+  id: '/aviator',
+  path: '/aviator',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SlotsRoute = SlotsRouteImport.update({
@@ -49,6 +56,11 @@ const LivePreviewRoute = LivePreviewRouteImport.update({
   path: '/live/preview',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AviatorGameModeRoute = AviatorGameModeRouteImport.update({
+  id: '/game/$mode',
+  path: '/game/$mode',
+  getParentRoute: () => AviatorRoute,
+} as any)
 const ClientAccountSplatRoute = ClientAccountSplatRouteImport.update({
   id: '/client/account/$',
   path: '/client/account/$',
@@ -68,10 +80,12 @@ const SlotsGameIdentRoute = SlotsGameIdentRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/aviator': typeof AviatorRouteWithChildren
   '/slots': typeof SlotsRouteWithChildren
   '/virtual-soccer': typeof VirtualSoccerRoute
   '/live/calendar': typeof LiveCalendarRoute
   '/live/preview': typeof LivePreviewRoute
+  '/aviator/game/$mode': typeof AviatorGameModeRoute
   '/client/account/$': typeof ClientAccountSplatRoute
   '/live/event/$id': typeof LiveEventIdRoute
   '/slots/game/$ident': typeof SlotsGameIdentRoute
@@ -79,10 +93,12 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/aviator': typeof AviatorRouteWithChildren
   '/slots': typeof SlotsRouteWithChildren
   '/virtual-soccer': typeof VirtualSoccerRoute
   '/live/calendar': typeof LiveCalendarRoute
   '/live/preview': typeof LivePreviewRoute
+  '/aviator/game/$mode': typeof AviatorGameModeRoute
   '/client/account/$': typeof ClientAccountSplatRoute
   '/live/event/$id': typeof LiveEventIdRoute
   '/slots/game/$ident': typeof SlotsGameIdentRoute
@@ -91,10 +107,12 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/aviator': typeof AviatorRouteWithChildren
   '/slots': typeof SlotsRouteWithChildren
   '/virtual-soccer': typeof VirtualSoccerRoute
   '/live_/calendar': typeof LiveCalendarRoute
   '/live_/preview': typeof LivePreviewRoute
+  '/aviator/game/$mode': typeof AviatorGameModeRoute
   '/client/account/$': typeof ClientAccountSplatRoute
   '/live_/event_/$id': typeof LiveEventIdRoute
   '/slots/game/$ident': typeof SlotsGameIdentRoute
@@ -104,10 +122,12 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/aviator'
     | '/slots'
     | '/virtual-soccer'
     | '/live/calendar'
     | '/live/preview'
+    | '/aviator/game/$mode'
     | '/client/account/$'
     | '/live/event/$id'
     | '/slots/game/$ident'
@@ -115,10 +135,12 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin'
+    | '/aviator'
     | '/slots'
     | '/virtual-soccer'
     | '/live/calendar'
     | '/live/preview'
+    | '/aviator/game/$mode'
     | '/client/account/$'
     | '/live/event/$id'
     | '/slots/game/$ident'
@@ -126,10 +148,12 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/aviator'
     | '/slots'
     | '/virtual-soccer'
     | '/live_/calendar'
     | '/live_/preview'
+    | '/aviator/game/$mode'
     | '/client/account/$'
     | '/live_/event_/$id'
     | '/slots/game/$ident'
@@ -138,6 +162,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
+  AviatorRoute: typeof AviatorRouteWithChildren
   SlotsRoute: typeof SlotsRouteWithChildren
   VirtualSoccerRoute: typeof VirtualSoccerRoute
   LiveCalendarRoute: typeof LiveCalendarRoute
@@ -160,6 +185,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/aviator': {
+      id: '/aviator'
+      path: '/aviator'
+      fullPath: '/aviator'
+      preLoaderRoute: typeof AviatorRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/slots': {
@@ -190,6 +222,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LivePreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/aviator/game/$mode': {
+      id: '/aviator/game/$mode'
+      path: '/game/$mode'
+      fullPath: '/aviator/game/$mode'
+      preLoaderRoute: typeof AviatorGameModeRouteImport
+      parentRoute: typeof AviatorRoute
+    }
     '/client/account/$': {
       id: '/client/account/$'
       path: '/client/account/$'
@@ -214,6 +253,17 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AviatorRouteChildren {
+  AviatorGameModeRoute: typeof AviatorGameModeRoute
+}
+
+const AviatorRouteChildren: AviatorRouteChildren = {
+  AviatorGameModeRoute: AviatorGameModeRoute,
+}
+
+const AviatorRouteWithChildren =
+  AviatorRoute._addFileChildren(AviatorRouteChildren)
+
 interface SlotsRouteChildren {
   SlotsGameIdentRoute: typeof SlotsGameIdentRoute
 }
@@ -227,6 +277,7 @@ const SlotsRouteWithChildren = SlotsRoute._addFileChildren(SlotsRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
+  AviatorRoute: AviatorRouteWithChildren,
   SlotsRoute: SlotsRouteWithChildren,
   VirtualSoccerRoute: VirtualSoccerRoute,
   LiveCalendarRoute: LiveCalendarRoute,

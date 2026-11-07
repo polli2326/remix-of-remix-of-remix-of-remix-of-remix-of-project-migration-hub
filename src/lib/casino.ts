@@ -1,5 +1,8 @@
 import type { CasinoGame } from "@/lib/fortebet.functions";
 
+/** Fortebet's game id for Spribe Aviator (the Aviator menu page starts this game). */
+export const AVIATOR_GAME_ID = 204;
+
 export const CASINO_PROVIDERS = [
   { key: "all", label: "All providers", icon: "all_providers", provider: null },
   { key: "apollo_casino", label: "Apollo Casino", icon: "apollo_casino", provider: "Apollo Casino" },

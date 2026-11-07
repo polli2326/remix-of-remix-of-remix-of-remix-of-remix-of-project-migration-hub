@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { GameModal, casinoGamesQuery } from "@/components/casino";
-import { AVIATOR_GAME_ID } from "./aviator";
+import { AVIATOR_GAME_ID } from "@/lib/casino";
 
 export const Route = createFileRoute("/aviator/game/$mode")({
   head: () => ({ meta: [

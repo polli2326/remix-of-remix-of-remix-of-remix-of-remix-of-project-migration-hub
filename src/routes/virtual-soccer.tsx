@@ -6,6 +6,7 @@ import { AccountHeader } from "@/components/account-header";
 import { Button } from "@/components/ui/button";
 import { openRegister } from "@/lib/login-modal";
 import { VirtualNavItem, virtualOfferQuery } from "@/components/virtual-nav";
+import { nextVirtualMatch } from "@/lib/live-nav";
 import { kickoffCountdown, virtualOddLabel, virtualClock, toggleVirtualPick, type VirtualMatch, type VirtualOdd, type VirtualPick } from "@/lib/virtual-soccer";
 import capturedCSS from "../styles/pages/virtual-soccer.css?raw";
 
@@ -39,7 +40,7 @@ function Index() {
     return () => document.removeEventListener("keydown", close);
   }, [expanded]);
   useEffect(() => { setNow(Date.now()); const timer = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(timer); }, []);
-  const countdown = kickoffCountdown(offer.matches[0]?.item_time, now ?? Date.parse(offer.at));
+  const countdown = kickoffCountdown(nextVirtualMatch(offer.matches, now ?? Date.parse(offer.at))?.item_time, now ?? Date.parse(offer.at));
   const viewerUrl = view === "stream" ? "https://zweb4ug.com/forteugvideo/index.php" : "https://zweb4ug.com/forteug/index.php";
   const total = picks.reduce((value, pick) => value * pick.odd.odds_val, 1);
   function selectOdd(match: VirtualMatch, odd: VirtualOdd, market: string) {

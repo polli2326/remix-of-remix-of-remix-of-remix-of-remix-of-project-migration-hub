@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { AccountHeader } from "@/components/account-header";
-import { BannerSlider, BetSlip, useSels, OfferCenter, HeaderClock, LiveOddsFeed } from "@/components/fortebet-live";
+import { BannerSlider, BetSlip, useSels, OfferCenter, HeaderClock, LiveOddsFeed, prematchQuery, liveQuery, bannersQuery } from "@/components/fortebet-live";
 import { openRegister } from "@/lib/login-modal";
 import { Button } from "@/components/ui/button";
 import { TicketSearch } from "@/components/ticket-check";
@@ -21,6 +21,12 @@ export const Route = createFileRoute("/")({
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary_large_image" },
   ] }),
+  // Matches, live odds and banners load on the server and arrive with the page.
+  loader: ({ context }) => Promise.all([
+    context.queryClient.ensureQueryData(prematchQuery),
+    context.queryClient.ensureQueryData(liveQuery),
+    context.queryClient.ensureQueryData(bannersQuery),
+  ]).then(() => null),
   staticData: { importedDocument: { html: { "lang": "en" }, body: { "data-site-import-responsive-incomplete": "scroll" } } },
   component: Index,
 });

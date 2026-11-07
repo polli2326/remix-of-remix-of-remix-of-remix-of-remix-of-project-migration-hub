@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { LiveShell } from "@/components/live-shell";
-import { EventDetail, LiveEventHeader, BetSlip, useSels } from "@/components/fortebet-live";
+import { EventDetail, LiveEventHeader, BetSlip, useSels, liveQuery, eventDetailQuery } from "@/components/fortebet-live";
 
 export const Route = createFileRoute("/live_/event_/$id")({
   head: () => ({ meta: [
@@ -11,6 +11,10 @@ export const Route = createFileRoute("/live_/event_/$id")({
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary_large_image" },
   ] }),
+  loader: ({ context, params }) => Promise.all([
+    context.queryClient.ensureQueryData(liveQuery),
+    context.queryClient.ensureQueryData(eventDetailQuery(params.id, true)).catch(() => null),
+  ]).then(() => null),
   component: LiveEventPage,
 });
 

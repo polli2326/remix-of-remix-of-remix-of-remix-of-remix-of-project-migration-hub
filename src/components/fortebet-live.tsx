@@ -437,8 +437,11 @@ export function BannerSlider() {
 }
 
 // ---------- Event markets ----------
+export const eventDetailQuery = (id: string, live: boolean) =>
+  queryOptions({ queryKey: ["fb-ev", id, live], queryFn: () => getEventDetail({ data: { id, live } }), refetchInterval: live ? 10_000 : 30_000, staleTime: 5_000 });
+
 function useEventDetail(id: string, live: boolean) {
-  const q = useQuery({ queryKey: ["fb-ev", id, live], queryFn: () => getEventDetail({ data: { id, live } }), refetchInterval: live ? 10_000 : 30_000 });
+  const q = useQuery(eventDetailQuery(id, live));
   useEffect(() => {
     if (q.data) seedOdds(q.data.markets.flatMap((m) => m.outcomes.filter((o) => o.odds).map((o) => ({ id: o.id, v: o.odds!, l: o.locked }))), q.data.at);
   }, [q.data]);

@@ -2,8 +2,6 @@ import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
 import { LiveShell } from "@/components/live-shell";
 import { casinoGamesQuery } from "@/components/casino";
 
-export const AVIATOR_GAME_ID = 204;
-
 export const Route = createFileRoute("/aviator")({
   head: () => ({ meta: [
     { title: "Aviator - Play for fun or for money | Fortebet" },
