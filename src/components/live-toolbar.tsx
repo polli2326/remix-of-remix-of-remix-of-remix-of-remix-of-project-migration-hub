@@ -75,15 +75,15 @@ export function LiveToolbar() {
 
   return (
     <div className="live__head">
-      <div className="[transition:width_0.2s_ease-in-out]" style={{ minWidth: "calc(39px * var(--factor))", width: open ? "calc(195px * var(--factor))" : undefined }}>
+      <div className="[transition:width_0.2s_ease-in-out]" style={{ minWidth: "calc(39px * var(--factor))" }}>
         <div data-ce="offer-search">
-          <div className={`searchOffer [font-weight:700] ${open ? "open" : ""}`}>
+          <div className="searchOffer [font-weight:700]">
             <input ref={input} id="searchInputEl" name="searchOffer" type="text" placeholder="Looking for something?" autoComplete="off"
-              value={s.q} onFocus={() => setSearchOpen(true)} onBlur={() => setSearchOpen(false)}
+              className={open ? "filledout" : ""} value={s.q} onFocus={() => setSearchOpen(true)} onBlur={() => setSearchOpen(false)}
               onChange={(e) => { liveActions.search(e.target.value); toList(); }}
               onKeyDown={(e) => { if (e.key === "Escape") { liveActions.search(""); input.current?.blur(); } }} />
             {s.q ? (
-              <label className="curPointer" aria-label="Clear search" onMouseDown={(e) => { e.preventDefault(); liveActions.search(""); }} style={{ color: "rgb(0,166,90)", fontWeight: 900 }}>✕</label>
+              <label className="curPointer" aria-label="Clear search" onMouseDown={(e) => { e.preventDefault(); liveActions.search(""); }} style={{ position: "absolute", top: "calc(8px * var(--factor))", right: "calc(10px * var(--factor))", color: "rgb(0,166,90)", fontWeight: 900 }}>✕</label>
             ) : (
               <label htmlFor="searchInputEl"><Ico id="icoGlass" cls="current h20" /></label>
             )}
