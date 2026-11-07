@@ -68,10 +68,11 @@ async function requestFortebet(
   method: "GET" | "POST",
   body?: unknown,
   timeoutMs?: number,
+  withSession = true,
 ): Promise<{ response: Response; payload: ApiPayload | null }> {
   const headers = new Headers({ Accept: "application/json" });
   setResponseHeader('Cache-Control', 'no-store');
-  const cookie = getFortebetSessionCookieHeader();
+  const cookie = withSession ? getFortebetSessionCookieHeader() : undefined;
   if (cookie) headers.set("Cookie", cookie);
   if (body !== undefined) headers.set("Content-Type", "application/json");
 
@@ -446,15 +447,17 @@ export async function submitFortebetLogout(): Promise<AccountActionResult> {
   }
 }
 
-export async function submitFortebetRegistration(
-  data: RegistrationInput,
-): Promise<AccountActionResult> {
+/** Mirrors exactly the "ClientRegistrationFull" body fortebet.ug's own form sends for Uganda;
+ *  Fortebet answers ERR_INTERNAL when the personal/address blocks are missing. */
+export function buildRegistrationData(data: RegistrationInput) {
   const promo = data.promo;
-  const registrationData = {
+  const nin = data.recordNumber.replace(/\s+/g, "").toUpperCase();
+  const emptyAddress = { streetName: "", streetNumber: "", city: "", zipcode: "", country: "" };
+  return {
     nickname: data.nickname,
     password: "",
     birthdate: data.birthdate,
-    record_number: data.recordNumber,
+    record_number: nin,
     email: data.email,
     phone: `+256${data.phone}`,
     firstname: data.firstName,
@@ -463,23 +466,28 @@ export async function submitFortebetRegistration(
     bonusCode: promo,
     channels: false,
     promo,
-    adult: true,
-    cookies: true,
-    lang: "EN",
-    meta: {
-      resident: "",
-      originUrl: "",
-      promo,
-      partner: "",
-      track: "",
-      channels: { email: true, sms: true },
+    meta: { resident: "", originUrl: "https://fortebet.ug/", promo, partner: promo, track: promo, channels: { email: true, sms: true } },
+    databox: "", gender: "", birth_place: "", birthnumber: "", birthnumberworld: "", record_type: "", income_source: "",
+    lang: "en", is_politician: "", adult: false, cookies: false,
+    main_street: "", main_numb: "", main_city: "", main_zipcode: "", main_country: "",
+    delivery_street: "", delivery_numb: "", delivery_city: "", delivery_zipcode: "", delivery_country: "",
+    address: [{ addressType: "MAIN", ...emptyAddress }, { addressType: "DELIVERY", ...emptyAddress }],
+    personal: {
+      gender: "", birthDate: data.birthdate, birthPlace: "", birthNumber: "", nationality: data.nationality,
+      identityDocumentType: "", identityDocumentNumber: nin, incomeSource: "", politician: false, adult: false, lang: "en", agreement: false,
     },
   };
+}
+
+export async function submitFortebetRegistration(
+  data: RegistrationInput,
+): Promise<AccountActionResult> {
+  const registrationData = buildRegistrationData(data);
 
   try {
     const { response, payload } = await requestFortebet("/client/register/create", "POST", {
       data: registrationData,
-    });
+    }, 20000, false);
     const result = payload?.data as Record<string, unknown> | null | undefined;
     const checks = Array.isArray(result?.["checks"]) ? (result!["checks"] as Record<string, unknown>[]) : [];
     console.info("[register] fortebet reply", JSON.stringify({
