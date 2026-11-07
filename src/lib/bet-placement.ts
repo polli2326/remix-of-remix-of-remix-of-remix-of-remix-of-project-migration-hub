@@ -37,31 +37,31 @@ const text = (value: unknown) =>
 export function validatePlaceBetInput(input: unknown): PlaceBetInput {
   if (!input || typeof input !== "object") throw new Error("Review and confirm the bet before continuing.");
   const value = input as Record<string, unknown>;
-  if (value.confirmed !== true) throw new Error("Confirm the exact stake and selections before placing this real bet.");
+  if (value["confirmed"] !== true) throw new Error("Confirm the exact stake and selections before placing this real bet.");
 
-  const stake = round2(Number(value.stake));
+  const stake = round2(Number(value["stake"]));
   if (!Number.isFinite(stake) || stake < TICKET_RULES.MIN_STAKE || stake > TICKET_RULES.MAX_STAKE) {
     throw new Error(`Enter a stake between ${TICKET_RULES.MIN_STAKE.toLocaleString("en-US")} and ${TICKET_RULES.MAX_STAKE.toLocaleString("en-US")} UGX.`);
   }
-  if (!Array.isArray(value.selections) || value.selections.length < 1 || value.selections.length > TICKET_RULES.MAX_ITEMS) {
+  if (!Array.isArray(value["selections"]) || value["selections"].length < 1 || value["selections"].length > TICKET_RULES.MAX_ITEMS) {
     throw new Error("Choose between 1 and 150 selections.");
   }
 
   const oddsIds = new Set<number>();
   const eventIds = new Set<string>();
-  const selections = value.selections.map((item): PlaceBetSelection => {
+  const selections = value["selections"].map((item): PlaceBetSelection => {
     if (!item || typeof item !== "object") throw new Error("The bet slip contains an invalid selection.");
     const selection = item as Record<string, unknown>;
-    const oddsId = Number(selection.oddsId);
-    const odds = round2(Number(selection.odds));
-    const eventId = typeof selection.eventId === "string" ? selection.eventId.slice(0, 80) : "";
+    const oddsId = Number(selection["oddsId"]);
+    const odds = round2(Number(selection["odds"]));
+    const eventId = typeof selection["eventId"] === "string" ? selection["eventId"].slice(0, 80) : "";
     if (!Number.isSafeInteger(oddsId) || oddsId <= 0 || !Number.isFinite(odds) || odds < 1 || odds > 1_000_000 || !eventId) {
       throw new Error("The bet slip contains invalid odds. Refresh the offer and choose again.");
     }
     if (oddsIds.has(oddsId) || eventIds.has(eventId)) throw new Error("Choose only one outcome per match.");
     oddsIds.add(oddsId);
     eventIds.add(eventId);
-    return { oddsId, eventId, odds, live: selection.live === true };
+    return { oddsId, eventId, odds, live: selection["live"] === true };
   });
 
   return { confirmed: true, stake, selections };
@@ -82,8 +82,8 @@ export function buildBetTicketData(input: PlaceBetInput) {
       combiGroupStakes: [],
       items: input.selections.map((selection) => ({
         groupId: 0,
-        oddsId: selection.oddsId,
-        odds: selection.odds,
+        oddsId: selection["oddsId"],
+        odds: selection["odds"],
       })),
     },
   } as const;
@@ -119,12 +119,12 @@ export function betFailureMessage(code: string) {
 /** Maps only Fortebet's explicit SB_AUTH_ACCEPTED state to success. */
 export function parseBetPlacementResult(payload: unknown, httpOk: boolean): BetPlacementResult {
   const root = payload && typeof payload === "object" ? (payload as Record<string, unknown>) : {};
-  const envelopeCode = text(root.code);
-  if (!httpOk || root.status !== "OK") {
+  const envelopeCode = text(root["code"]);
+  if (!httpOk || root["status"] !== "OK") {
     return { status: "rejected", code: envelopeCode || "ERR_INTERNAL", message: betFailureMessage(envelopeCode) };
   }
 
-  const data = root.data && typeof root.data === "object" ? (root.data as Record<string, unknown>) : {};
+  const data = root["data"] && typeof root["data"] === "object" ? (root["data"] as Record<string, unknown>) : {};
   const result = text(data.result);
   if (result === "SB_AUTH_ACCEPTED") {
     const ticket = data.ticket && typeof data.ticket === "object" ? (data.ticket as Record<string, unknown>) : {};
