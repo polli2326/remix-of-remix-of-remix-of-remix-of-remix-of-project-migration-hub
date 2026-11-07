@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { TicketSearch } from "@/components/ticket-check";
 import { OfferSearch, DateFilter, OddsRange, TopBetsList, MySelection, SportsList } from "@/components/offer-sidebar";
 import { OfferFilterProvider } from "@/components/offer-context";
+import { VirtualNavItem } from "@/components/virtual-nav";
 import capturedCSS from "../styles/site.css?raw";
 
 const ImportedNativeTag0 = "sbticket" as import("react").ElementType;
@@ -358,16 +359,7 @@ function Index() {
                   </li>
                   <li {...({ "_ngcontent-oky-c206": "" } as any)}>
                     <a className="withIco" href="/virtual-soccer" {...({ "_ngcontent-oky-c206": "", routerlinkactive: "active" } as any)}>
-                      <div data-ce="app-virtual-soccer-sec-header" {...({ "_ngcontent-oky-c206": "" } as any)}>
-                        <div>
-                          <icon {...({ href: "#icoSportVirtualsoccer", classname: "current h30", "_nghost-oky-c39": "" } as any)}>
-                            <svg className="current h30 align-middle" viewBox="0 0 100 100" {...({ "_ngcontent-oky-c39": "" } as any)}>
-                              <use xlinkHref="#icoSportVirtualsoccer" {...({ "_ngcontent-oky-c39": "" } as any)} />
-                            </svg>
-                          </icon>
-                        </div>
-                        <div> B.M-Lev <br /><span>03:13</span></div>
-                      </div>
+                      <VirtualNavItem />
                     </a>
                   </li>
                   <li {...({ "_ngcontent-oky-c206": "" } as any)}>
