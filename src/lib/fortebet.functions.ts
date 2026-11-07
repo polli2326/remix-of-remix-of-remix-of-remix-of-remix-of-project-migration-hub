@@ -322,15 +322,19 @@ export type TicketDTO = {
 export type TicketResult = { ok: true; ticket: TicketDTO } | { ok: false; error: "SHORT" | "NOT_FOUND" | "UNAVAILABLE" };
 
 export const checkTicket = createServerFn({ method: "POST" })
-  .inputValidator((input: { number: string }) => ({ number: String(input?.number ?? "").replace(/\D/g, "").slice(0, 30) }))
+  .inputValidator((input: { number: string; type?: string }) => ({ number: String(input?.number ?? "").replace(/\D/g, "").slice(0, 30), type: input?.type === 'VSOCCER' || input?.type === 'KENO' ? input.type : undefined }))
   .handler(async ({ data }): Promise<TicketResult> => {
     const n = data.number;
     if (n.length < 14) return { ok: false, error: "SHORT" };
-    const virtual = n[0] === "4" || n[0] === "5";
+    const virtual = data.type === 'VSOCCER' || n[0] === "4" || n[0] === "5";
     try {
-      const res = await fetch(BASE + (virtual ? "/virtual-soccer/ticket-detail" : "/ticket/sbt-detail"), {
+      const {getFortebetSessionCookieHeader} = await import('./account-session.server');
+      const {setResponseHeader} = await import('@tanstack/react-start/server');
+      setResponseHeader('Cache-Control','no-store');
+      const cookie = getFortebetSessionCookieHeader();
+      const res = await fetch(BASE + (data.type === 'KENO' ? '/keno/ticket-detail' : virtual ? "/virtual-soccer/ticket-detail" : "/ticket/sbt-detail"), {
         method: "POST",
-        headers: { "User-Agent": "Mozilla/5.0", Accept: "application/json", "Content-Type": "application/json" },
+        headers: { "User-Agent": "Mozilla/5.0", Accept: "application/json", "Content-Type": "application/json", ...(cookie ? {Cookie:cookie} : {}) },
         body: JSON.stringify({ number: n }),
       });
       const j: Raw = await res.json().catch(() => null);
