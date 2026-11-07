@@ -691,7 +691,7 @@ function LiveRow({ e, o, slip, open, fav, onOpen, onStats }: { e: OfferEvent; o:
               {L.cells.slice(g * 3, g * 3 + 3).map((c, j) => {
                 const k = g * 3 + j;
                 const [mk, out] = MAIN_NAMES(L.cols[k] ?? "", e.h, e.a, sp?.market ?? "Full Time Result");
-                return L.cols[k] || c ? <OddBtn key={k} cell={c} at={o.at} mk={e.mk} sels={slip.sels} toggle={slip.toggle} info={{ eventId: e.id, match: `${e.h} - ${e.a}`, market: mk, outcome: out, live: true, start: e.s, league }} /> : <div key={k} />;
+                return L.cols[k] || c ? <OddBtn key={k} cell={c} at={o.at} mk={e.mk} sels={slip.sels} toggle={slip.toggle} info={{ eventId: e.id, match: `${e.h} - ${e.a}`, market: mk, outcome: out, live: true, start: e.s, league }} /> : <div key={k} aria-hidden style={{ visibility: "hidden" }} />;
               })}
             </div>
           ))}
